@@ -7,8 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "auth:sql": "node scripts/better-auth-sql.mjs",
-    "auth:migrate": "node scripts/better-auth-migrate.mjs"
+    "auth:sql": "node --env-file=.env.local scripts/better-auth-sql.mjs",
+    "auth:migrate": "node --env-file=.env.local scripts/better-auth-migrate.mjs"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.4",
