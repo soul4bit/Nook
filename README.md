@@ -3,7 +3,7 @@
 Nook is a personal second-brain app with a card-first feel:
 - Next.js + Tailwind + shadcn/ui
 - Tiptap editor
-- Supabase-ready (Auth/DB/Storage)
+- PostgreSQL + Better Auth
 - Optional Dexie local cache
 
 ## Local development
@@ -13,29 +13,48 @@ Nook is a personal second-brain app with a card-first feel:
    ```bash
    cp .env.example .env.local
    ```
-3. Add your Supabase values in `.env.local`.
-4. Run the app:
+3. Fill `.env.local`:
+   - `DATABASE_URL`
+   - `BETTER_AUTH_SECRET`
+   - `BETTER_AUTH_URL`
+4. Apply Better Auth migrations:
+   ```bash
+   npm run auth:migrate
+   ```
+5. Run the app:
    ```bash
    npm run dev
    ```
-5. Open `http://localhost:3000`.
+6. Open `http://localhost:3000`.
 
-## Recommended deploy flow (local -> host)
+## Deploy to VPS
 
-1. Work locally and commit to Git.
-2. Push to GitHub.
-3. Connect repo to Vercel.
-4. Set project root in Vercel to `nook-app` (because this repository root is `Nook` with uppercase and npm package naming is lowercase-only).
-5. Add env vars in Vercel dashboard:
-   - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+1. Create `.env.local` on the server.
+2. Add:
+   - `DATABASE_URL`
+   - `BETTER_AUTH_SECRET`
+   - `BETTER_AUTH_URL=https://your-domain`
+3. Run migrations:
+   ```bash
+   npm run auth:migrate
+   ```
+4. Build and restart:
+   ```bash
+   npm ci
+   npm run build
+   sudo systemctl restart nook
+   ```
 
-Every push to `main` auto-deploys.  
-Preview URLs are created for pull requests.
+## Useful commands
+
+```bash
+npm run auth:sql
+npm run auth:migrate
+```
 
 ## Next implementation step
 
-- Add Supabase Auth (magic link or OAuth)
-- Add note table + RLS policies
+- Add page tree and sidebar
+- Add note table structure
 - Persist editor content
-- Enable Realtime note updates between devices
+- Add local file uploads

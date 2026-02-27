@@ -1,15 +1,15 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { signOutAction } from "@/app/auth/actions";
+import { SignOutButton } from "@/components/auth/sign-out-button";
 import { ThoughtEditor } from "@/components/editor/thought-editor";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getCurrentSession } from "@/lib/auth/session";
 
 const cards = [
   {
-    title: "Глава",
+    title: "Главы",
     text: "Собирай идеи в страницы, как в вики, но с личным контекстом.",
     tag: "структура",
   },
@@ -26,12 +26,9 @@ const cards = [
 ];
 
 export default async function AppPage() {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const session = await getCurrentSession();
 
-  if (!user) {
+  if (!session) {
     redirect("/auth");
   }
 
@@ -44,16 +41,14 @@ export default async function AppPage() {
               Nook workspace
             </p>
             <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
-              Привет, {user.email}
+              Привет, {session.user.email}
             </h1>
           </div>
           <div className="flex items-center gap-2">
             <Button asChild variant="outline">
               <Link href="/auth">Аккаунт</Link>
             </Button>
-            <form action={signOutAction}>
-              <Button type="submit">Выйти</Button>
-            </form>
+            <SignOutButton />
           </div>
         </header>
 
