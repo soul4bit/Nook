@@ -1,6 +1,8 @@
-import { betterAuth } from "better-auth";
+﻿import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
+import { admin } from "better-auth/plugins/admin";
 import { Pool } from "pg";
+import { sendResetPasswordEmail, sendVerificationEmail } from "@/lib/mail/server";
 import { getAuthEnv } from "./env";
 
 declare global {
@@ -26,6 +28,28 @@ export const auth = betterAuth({
   basePath: "/api/auth",
   emailAndPassword: {
     enabled: true,
+    autoSignIn: false,
+    requireEmailVerification: true,
+    revokeSessionsOnPasswordReset: true,
+    async sendResetPassword({ user, url }) {
+      await sendResetPasswordEmail({
+        email: user.email,
+        name: user.name,
+        url,
+      });
+    },
   },
-  plugins: [nextCookies()],
+  emailVerification: {
+    sendOnSignUp: true,
+    sendOnSignIn: true,
+    autoSignInAfterVerification: true,
+    async sendVerificationEmail({ user, url }) {
+      await sendVerificationEmail({
+        email: user.email,
+        name: user.name,
+        url,
+      });
+    },
+  },
+  plugins: [admin(), nextCookies()],
 });

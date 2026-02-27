@@ -1,5 +1,6 @@
-import { betterAuth } from "better-auth";
+﻿import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
+import { admin } from "better-auth/plugins/admin";
 import { Pool } from "pg";
 
 function getAuthEnv() {
@@ -33,6 +34,8 @@ export const auth = betterAuth({
   basePath: "/api/auth",
   emailAndPassword: {
     enabled: true,
+    autoSignIn: false,
+    requireEmailVerification: true,
   },
-  plugins: [nextCookies()],
+  plugins: [admin(), nextCookies()],
 });

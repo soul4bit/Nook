@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -22,7 +22,13 @@ export function SignOutButton() {
   }
 
   return (
-    <Button type="button" onClick={handleSignOut} disabled={isPending}>
+    <Button
+      type="button"
+      variant="outline"
+      className="rounded-2xl border-emerald-200 bg-white/80 text-emerald-900 hover:bg-emerald-50"
+      onClick={handleSignOut}
+      disabled={isPending}
+    >
       {isPending ? "Выходим..." : "Выйти"}
     </Button>
   );

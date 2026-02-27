@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -8,8 +8,8 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const initialContent = `
-  <h2>Новая мысль</h2>
-  <p>Что сейчас кажется важным и почему?</p>
+  <h2>Новая страница</h2>
+  <p>Что важно зафиксировать сейчас, пока мысль еще живая?</p>
 `;
 
 export function ThoughtEditor() {
@@ -17,7 +17,7 @@ export function ThoughtEditor() {
     extensions: [
       StarterKit,
       Placeholder.configure({
-        placeholder: "Начни писать мысль...",
+        placeholder: "Начни писать страницу, идею или связку мыслей...",
       }),
     ],
     content: initialContent,
@@ -25,7 +25,7 @@ export function ThoughtEditor() {
     editorProps: {
       attributes: {
         class:
-          "nook-editor min-h-64 rounded-2xl border border-stone-900/10 bg-white px-4 py-3 text-[15px] leading-7 text-stone-800 focus-visible:outline-none",
+          "nook-editor min-h-72 rounded-[28px] border border-emerald-100 bg-white/90 px-5 py-4 text-[15px] leading-7 text-emerald-950 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] focus-visible:outline-none",
       },
     },
   });
@@ -40,8 +40,9 @@ export function ThoughtEditor() {
           size="sm"
           variant="outline"
           className={cn(
-            "border-stone-900/10 bg-white/80",
-            editor.isActive("bold") && "bg-stone-900 text-white hover:bg-stone-800"
+            "rounded-xl border-emerald-200 bg-white/80 text-emerald-950 hover:bg-emerald-50",
+            editor.isActive("bold") &&
+              "border-emerald-500 bg-emerald-500 text-white hover:bg-emerald-500"
           )}
           onClick={() => editor.chain().focus().toggleBold().run()}
         >
@@ -53,9 +54,9 @@ export function ThoughtEditor() {
           size="sm"
           variant="outline"
           className={cn(
-            "border-stone-900/10 bg-white/80",
+            "rounded-xl border-emerald-200 bg-white/80 text-emerald-950 hover:bg-emerald-50",
             editor.isActive("heading", { level: 2 }) &&
-              "bg-stone-900 text-white hover:bg-stone-800"
+              "border-emerald-500 bg-emerald-500 text-white hover:bg-emerald-500"
           )}
           onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
         >
@@ -67,9 +68,9 @@ export function ThoughtEditor() {
           size="sm"
           variant="outline"
           className={cn(
-            "border-stone-900/10 bg-white/80",
+            "rounded-xl border-emerald-200 bg-white/80 text-emerald-950 hover:bg-emerald-50",
             editor.isActive("bulletList") &&
-              "bg-stone-900 text-white hover:bg-stone-800"
+              "border-emerald-500 bg-emerald-500 text-white hover:bg-emerald-500"
           )}
           onClick={() => editor.chain().focus().toggleBulletList().run()}
         >
@@ -81,9 +82,9 @@ export function ThoughtEditor() {
           size="sm"
           variant="outline"
           className={cn(
-            "border-stone-900/10 bg-white/80",
+            "rounded-xl border-emerald-200 bg-white/80 text-emerald-950 hover:bg-emerald-50",
             editor.isActive("orderedList") &&
-              "bg-stone-900 text-white hover:bg-stone-800"
+              "border-emerald-500 bg-emerald-500 text-white hover:bg-emerald-500"
           )}
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
         >
