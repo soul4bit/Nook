@@ -25,7 +25,7 @@ export async function createSupabaseServerClient() {
             }) => cookieStore.set(name, value, options)
           );
         } catch {
-          // Ignored when called from Server Components that cannot set cookies.
+          // Игнорируем для тех Server Components, где установка cookie недоступна.
         }
       },
     },
