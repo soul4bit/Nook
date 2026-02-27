@@ -1,8 +1,10 @@
 import { getMigrations } from "better-auth/db";
-import { auth } from "../src/lib/auth/server";
+import { auth, pool } from "./auth-instance.mjs";
 
-const migrations = await getMigrations(auth.options);
-
-await migrations.runMigrations();
-
-console.log("Better Auth migrations applied.");
+try {
+  const migrations = await getMigrations(auth.options);
+  await migrations.runMigrations();
+  console.log("Better Auth migrations applied.");
+} finally {
+  await pool.end();
+}
