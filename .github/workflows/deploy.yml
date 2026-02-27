@@ -22,6 +22,7 @@ jobs:
             cd /var/www/nook
             git pull --ff-only origin main
             npm ci
+            npm run auth:migrate
             npm run build
             sudo systemctl restart nook
             sudo systemctl status nook --no-pager
