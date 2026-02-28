@@ -1,15 +1,15 @@
 ﻿"use client";
 
 import { EditorContent, useEditor } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
+import StarterKit from "@tiptap/starter-kit";
 import { Bold, Heading2, List, ListOrdered } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const initialContent = `
-  <h2>Новая страница</h2>
-  <p>Что важно зафиксировать сейчас, пока мысль еще живая?</p>
+  <h2>Новая заметка</h2>
+  <p>Зафиксируй мысль, пока она еще живая.</p>
 `;
 
 export function ThoughtEditor() {
@@ -17,7 +17,7 @@ export function ThoughtEditor() {
     extensions: [
       StarterKit,
       Placeholder.configure({
-        placeholder: "Начни писать страницу, идею или связку мыслей...",
+        placeholder: "Начни писать заметку, идею или короткий черновик...",
       }),
     ],
     content: initialContent,
@@ -47,7 +47,7 @@ export function ThoughtEditor() {
           onClick={() => editor.chain().focus().toggleBold().run()}
         >
           <Bold />
-          Bold
+          Жирный
         </Button>
         <Button
           type="button"
@@ -61,7 +61,7 @@ export function ThoughtEditor() {
           onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
         >
           <Heading2 />
-          H2
+          Заголовок
         </Button>
         <Button
           type="button"
@@ -75,7 +75,7 @@ export function ThoughtEditor() {
           onClick={() => editor.chain().focus().toggleBulletList().run()}
         >
           <List />
-          List
+          Список
         </Button>
         <Button
           type="button"
@@ -89,7 +89,7 @@ export function ThoughtEditor() {
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
         >
           <ListOrdered />
-          Numbered
+          Нумерация
         </Button>
       </div>
 
@@ -97,3 +97,4 @@ export function ThoughtEditor() {
     </div>
   );
 }
+

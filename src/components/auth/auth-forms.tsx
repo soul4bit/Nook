@@ -1,16 +1,8 @@
 ﻿"use client";
 
 import { type FormEvent, useMemo, useState } from "react";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-  ArrowLeft,
-  ArrowRight,
-  KeyRound,
-  LoaderCircle,
-  Mail,
-  UserPlus,
-} from "lucide-react";
+import { ArrowLeft, KeyRound, LoaderCircle, Mail, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -101,16 +93,16 @@ export function AuthForms() {
   const resendEmail = lastEmail || signInForm.email || signUpForm.email || resetEmail;
   const title =
     mode === "sign-in"
-      ? "Войдите в Nook"
+      ? "Войти"
       : mode === "sign-up"
-        ? "Создайте аккаунт"
-        : "Восстановите пароль";
+        ? "Регистрация"
+        : "Сброс пароля";
   const description =
     mode === "sign-in"
-      ? "Обычный вход по email и паролю. Если аккаунта нет, откройте регистрацию ниже."
+      ? "Введите email и пароль, чтобы открыть свои заметки."
       : mode === "sign-up"
-        ? "Сначала создайте аккаунт, затем подтвердите email из письма."
-        : "Мы отправим ссылку на почту и откроем отдельный экран для нового пароля.";
+        ? "Создайте аккаунт и подтвердите email из письма."
+        : "Отправим ссылку для сброса пароля на вашу почту.";
 
   async function handleSignIn(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -303,9 +295,15 @@ export function AuthForms() {
                   disabled={pendingAction === "resend"}
                 >
                   {pendingAction === "resend" ? (
-                    <><LoaderCircle className="size-4 animate-spin" />Отправляем письмо...</>
+                    <>
+                      <LoaderCircle className="size-4 animate-spin" />
+                      Отправляем письмо...
+                    </>
                   ) : (
-                    <><ArrowRight className="size-4" />Отправить письмо еще раз</>
+                    <>
+                      <Mail className="size-4" />
+                      Отправить письмо еще раз
+                    </>
                   )}
                 </Button>
               </div>
@@ -317,31 +315,88 @@ export function AuthForms() {
           <>
             <form className="space-y-4" onSubmit={handleSignIn}>
               <div className="space-y-1.5">
-                <label htmlFor="signin-email" className="text-sm font-medium text-emerald-950">Email</label>
-                <Input id="signin-email" name="email" type="email" value={signInForm.email} onChange={(event) => setSignInForm((current) => ({ ...current, email: event.target.value }))} placeholder="you@wiki-soul4bit.ru" autoComplete="email" required />
+                <label htmlFor="signin-email" className="text-sm font-medium text-emerald-950">
+                  Email
+                </label>
+                <Input
+                  id="signin-email"
+                  name="email"
+                  type="email"
+                  value={signInForm.email}
+                  onChange={(event) =>
+                    setSignInForm((current) => ({ ...current, email: event.target.value }))
+                  }
+                  placeholder="you@wiki-soul4bit.ru"
+                  autoComplete="email"
+                  required
+                />
               </div>
 
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between gap-2">
-                  <label htmlFor="signin-password" className="text-sm font-medium text-emerald-950">Пароль</label>
-                  <button type="button" className="text-xs font-medium text-emerald-700 hover:text-emerald-900" onClick={() => { setMode("reset"); setFeedback(null); setResetEmail(signInForm.email); }}>
+                  <label htmlFor="signin-password" className="text-sm font-medium text-emerald-950">
+                    Пароль
+                  </label>
+                  <button
+                    type="button"
+                    className="text-xs font-medium text-emerald-700 hover:text-emerald-900"
+                    onClick={() => {
+                      setMode("reset");
+                      setFeedback(null);
+                      setResetEmail(signInForm.email);
+                    }}
+                  >
                     Забыли пароль?
                   </button>
                 </div>
-                <Input id="signin-password" name="password" type="password" value={signInForm.password} onChange={(event) => setSignInForm((current) => ({ ...current, password: event.target.value }))} placeholder="Введите пароль" autoComplete="current-password" required />
+                <Input
+                  id="signin-password"
+                  name="password"
+                  type="password"
+                  value={signInForm.password}
+                  onChange={(event) =>
+                    setSignInForm((current) => ({ ...current, password: event.target.value }))
+                  }
+                  placeholder="Введите пароль"
+                  autoComplete="current-password"
+                  required
+                />
               </div>
 
-              <Button type="submit" className="h-11 w-full rounded-2xl" disabled={pendingAction === "sign-in"}>
-                {pendingAction === "sign-in" ? <><LoaderCircle className="size-4 animate-spin" />Входим...</> : <><KeyRound className="size-4" />Войти</>}
+              <Button
+                type="submit"
+                className="h-11 w-full rounded-2xl"
+                disabled={pendingAction === "sign-in"}
+              >
+                {pendingAction === "sign-in" ? (
+                  <>
+                    <LoaderCircle className="size-4 animate-spin" />
+                    Входим...
+                  </>
+                ) : (
+                  <>
+                    <KeyRound className="size-4" />
+                    Войти
+                  </>
+                )}
               </Button>
             </form>
 
             <div className="rounded-[24px] border border-emerald-100 bg-emerald-50/60 p-4">
               <p className="text-sm font-medium text-emerald-950">Нет аккаунта?</p>
-              <p className="mt-1 text-sm leading-6 text-emerald-900/68">
-                Создайте его за минуту. После регистрации Nook отправит письмо подтверждения и включит доступ сразу после активации email.
-              </p>
-              <Button type="button" variant="outline" className="mt-4 w-full rounded-2xl border-emerald-200 bg-white/90 text-emerald-900 hover:bg-white" onClick={() => { setMode("sign-up"); setFeedback(null); setSignUpForm((current) => ({ ...current, email: signInForm.email || current.email })); }}>
+              <Button
+                type="button"
+                variant="outline"
+                className="mt-4 w-full rounded-2xl border-emerald-200 bg-white/90 text-emerald-900 hover:bg-white"
+                onClick={() => {
+                  setMode("sign-up");
+                  setFeedback(null);
+                  setSignUpForm((current) => ({
+                    ...current,
+                    email: signInForm.email || current.email,
+                  }));
+                }}
+              >
                 <UserPlus className="size-4" />
                 Зарегистрироваться
               </Button>
@@ -353,30 +408,113 @@ export function AuthForms() {
           <>
             <form className="space-y-4" onSubmit={handleSignUp}>
               <div className="space-y-1.5">
-                <label htmlFor="signup-name" className="text-sm font-medium text-emerald-950">Имя</label>
-                <Input id="signup-name" name="name" value={signUpForm.name} onChange={(event) => setSignUpForm((current) => ({ ...current, name: event.target.value }))} placeholder="Как к вам обращаться" autoComplete="name" required />
+                <label htmlFor="signup-name" className="text-sm font-medium text-emerald-950">
+                  Имя
+                </label>
+                <Input
+                  id="signup-name"
+                  name="name"
+                  value={signUpForm.name}
+                  onChange={(event) =>
+                    setSignUpForm((current) => ({ ...current, name: event.target.value }))
+                  }
+                  placeholder="Как к вам обращаться"
+                  autoComplete="name"
+                  required
+                />
               </div>
               <div className="space-y-1.5">
-                <label htmlFor="signup-email" className="text-sm font-medium text-emerald-950">Email</label>
-                <Input id="signup-email" name="email" type="email" value={signUpForm.email} onChange={(event) => setSignUpForm((current) => ({ ...current, email: event.target.value }))} placeholder="you@wiki-soul4bit.ru" autoComplete="email" required />
+                <label htmlFor="signup-email" className="text-sm font-medium text-emerald-950">
+                  Email
+                </label>
+                <Input
+                  id="signup-email"
+                  name="email"
+                  type="email"
+                  value={signUpForm.email}
+                  onChange={(event) =>
+                    setSignUpForm((current) => ({ ...current, email: event.target.value }))
+                  }
+                  placeholder="you@wiki-soul4bit.ru"
+                  autoComplete="email"
+                  required
+                />
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-1.5">
-                  <label htmlFor="signup-password" className="text-sm font-medium text-emerald-950">Пароль</label>
-                  <Input id="signup-password" name="password" type="password" value={signUpForm.password} onChange={(event) => setSignUpForm((current) => ({ ...current, password: event.target.value }))} placeholder="Минимум 8 символов" autoComplete="new-password" required />
+                  <label htmlFor="signup-password" className="text-sm font-medium text-emerald-950">
+                    Пароль
+                  </label>
+                  <Input
+                    id="signup-password"
+                    name="password"
+                    type="password"
+                    value={signUpForm.password}
+                    onChange={(event) =>
+                      setSignUpForm((current) => ({ ...current, password: event.target.value }))
+                    }
+                    placeholder="Минимум 8 символов"
+                    autoComplete="new-password"
+                    required
+                  />
                 </div>
                 <div className="space-y-1.5">
-                  <label htmlFor="signup-password-repeat" className="text-sm font-medium text-emerald-950">Повторите пароль</label>
-                  <Input id="signup-password-repeat" name="confirmPassword" type="password" value={signUpForm.confirmPassword} onChange={(event) => setSignUpForm((current) => ({ ...current, confirmPassword: event.target.value }))} placeholder="Повторите пароль" autoComplete="new-password" required />
+                  <label
+                    htmlFor="signup-password-repeat"
+                    className="text-sm font-medium text-emerald-950"
+                  >
+                    Повторите пароль
+                  </label>
+                  <Input
+                    id="signup-password-repeat"
+                    name="confirmPassword"
+                    type="password"
+                    value={signUpForm.confirmPassword}
+                    onChange={(event) =>
+                      setSignUpForm((current) => ({
+                        ...current,
+                        confirmPassword: event.target.value,
+                      }))
+                    }
+                    placeholder="Повторите пароль"
+                    autoComplete="new-password"
+                    required
+                  />
                 </div>
               </div>
 
-              <Button type="submit" className="h-11 w-full rounded-2xl" disabled={pendingAction === "sign-up"}>
-                {pendingAction === "sign-up" ? <><LoaderCircle className="size-4 animate-spin" />Создаем аккаунт...</> : <><UserPlus className="size-4" />Создать аккаунт</>}
+              <Button
+                type="submit"
+                className="h-11 w-full rounded-2xl"
+                disabled={pendingAction === "sign-up"}
+              >
+                {pendingAction === "sign-up" ? (
+                  <>
+                    <LoaderCircle className="size-4 animate-spin" />
+                    Создаем аккаунт...
+                  </>
+                ) : (
+                  <>
+                    <UserPlus className="size-4" />
+                    Создать аккаунт
+                  </>
+                )}
               </Button>
             </form>
 
-            <Button type="button" variant="ghost" className="w-full rounded-2xl text-emerald-800 hover:bg-emerald-50" onClick={() => { setMode("sign-in"); setFeedback(null); setSignInForm((current) => ({ ...current, email: signUpForm.email || current.email })); }}>
+            <Button
+              type="button"
+              variant="ghost"
+              className="w-full rounded-2xl text-emerald-800 hover:bg-emerald-50"
+              onClick={() => {
+                setMode("sign-in");
+                setFeedback(null);
+                setSignInForm((current) => ({
+                  ...current,
+                  email: signUpForm.email || current.email,
+                }));
+              }}
+            >
               <ArrowLeft className="size-4" />
               Уже есть аккаунт? Вернуться ко входу
             </Button>
@@ -387,34 +525,59 @@ export function AuthForms() {
           <>
             <form className="space-y-4" onSubmit={handleReset}>
               <div className="space-y-1.5">
-                <label htmlFor="reset-email" className="text-sm font-medium text-emerald-950">Email для восстановления</label>
-                <Input id="reset-email" name="email" type="email" value={resetEmail} onChange={(event) => setResetEmail(event.target.value)} placeholder="you@wiki-soul4bit.ru" autoComplete="email" required />
+                <label htmlFor="reset-email" className="text-sm font-medium text-emerald-950">
+                  Email для восстановления
+                </label>
+                <Input
+                  id="reset-email"
+                  name="email"
+                  type="email"
+                  value={resetEmail}
+                  onChange={(event) => setResetEmail(event.target.value)}
+                  placeholder="you@wiki-soul4bit.ru"
+                  autoComplete="email"
+                  required
+                />
               </div>
-              <Button type="submit" className="h-11 w-full rounded-2xl" disabled={pendingAction === "reset"}>
-                {pendingAction === "reset" ? <><LoaderCircle className="size-4 animate-spin" />Отправляем ссылку...</> : <><Mail className="size-4" />Отправить ссылку</>}
+              <Button
+                type="submit"
+                className="h-11 w-full rounded-2xl"
+                disabled={pendingAction === "reset"}
+              >
+                {pendingAction === "reset" ? (
+                  <>
+                    <LoaderCircle className="size-4 animate-spin" />
+                    Отправляем ссылку...
+                  </>
+                ) : (
+                  <>
+                    <Mail className="size-4" />
+                    Отправить ссылку
+                  </>
+                )}
               </Button>
             </form>
 
-            <Button type="button" variant="ghost" className="w-full rounded-2xl text-emerald-800 hover:bg-emerald-50" onClick={() => { setMode("sign-in"); setFeedback(null); setSignInForm((current) => ({ ...current, email: resetEmail || current.email })); }}>
+            <Button
+              type="button"
+              variant="ghost"
+              className="w-full rounded-2xl text-emerald-800 hover:bg-emerald-50"
+              onClick={() => {
+                setMode("sign-in");
+                setFeedback(null);
+                setSignInForm((current) => ({
+                  ...current,
+                  email: resetEmail || current.email,
+                }));
+              }}
+            >
               <ArrowLeft className="size-4" />
               Вернуться ко входу
             </Button>
           </>
         ) : null}
-
-        <div className="rounded-[24px] border border-emerald-100 bg-emerald-50/50 p-4 text-sm leading-6 text-emerald-900/72">
-          <p className="font-medium text-emerald-950">Базовый flow</p>
-          <p>
-            Вход доступен сразу. Регистрация открывается отдельной кнопкой, а сброс пароля не мешает основному сценарию.
-          </p>
-          <Button asChild variant="ghost" className="mt-3 h-auto px-0 text-emerald-700 hover:bg-transparent hover:text-emerald-900">
-            <Link href="/auth/reset-password">
-              Открыть отдельный экран сброса
-              <ArrowRight className="size-4" />
-            </Link>
-          </Button>
-        </div>
       </CardContent>
     </Card>
   );
 }
+
