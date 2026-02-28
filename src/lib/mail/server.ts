@@ -1,4 +1,5 @@
 ﻿import nodemailer from "nodemailer";
+import { APIError } from "better-call";
 import { getMailEnv } from "./env";
 import {
   getResetPasswordEmailTemplate,
@@ -16,7 +17,16 @@ function getTransporter() {
     return cachedTransporter;
   }
 
-  const env = getMailEnv();
+  let env: ReturnType<typeof getMailEnv>;
+
+  try {
+    env = getMailEnv();
+  } catch {
+    throw new APIError("BAD_REQUEST", {
+      message:
+        "Почта для регистрации не настроена. Проверьте SMTP_HOST, SMTP_PORT, SMTP_SECURE, SMTP_USER, SMTP_PASSWORD и MAIL_FROM.",
+    });
+  }
 
   cachedTransporter = nodemailer.createTransport({
     host: env.host,
@@ -45,13 +55,24 @@ async function sendMail({
   const transporter = getTransporter();
   const env = getMailEnv();
 
-  await transporter.sendMail({
-    from: env.from,
-    to,
-    subject,
-    text,
-    html,
-  });
+  try {
+    await transporter.sendMail({
+      from: env.from,
+      to,
+      subject,
+      text,
+      html,
+    });
+  } catch (error) {
+    const message =
+      error instanceof Error && error.message
+        ? error.message
+        : "unknown_smtp_error";
+
+    throw new APIError("BAD_GATEWAY", {
+      message: `Не удалось отправить письмо подтверждения. Проверьте SMTP настройки: ${message}`,
+    });
+  }
 }
 
 export async function sendVerificationEmail(input: {

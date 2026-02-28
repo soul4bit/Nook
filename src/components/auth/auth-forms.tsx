@@ -34,7 +34,16 @@ async function postAuth(path: string, payload: Record<string, unknown>) {
     body: JSON.stringify(payload),
   });
 
-  const result = await response.json().catch(() => null);
+  const rawText = await response.text();
+  let result: unknown = null;
+
+  if (rawText) {
+    try {
+      result = JSON.parse(rawText);
+    } catch {
+      result = { message: rawText };
+    }
+  }
 
   if (!response.ok) {
     throw new Error(extractAuthErrorMessage(result) ?? `HTTP_${response.status}`);
@@ -590,5 +599,7 @@ export function AuthForms() {
     </Card>
   );
 }
+
+
 
 

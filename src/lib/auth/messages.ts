@@ -27,6 +27,18 @@ export function extractAuthErrorMessage(error: unknown) {
 }
 
 export function getAuthErrorMessage(message?: string) {
+  if (!message) {
+    return "Не удалось выполнить запрос авторизации.";
+  }
+
+  if (message.startsWith("Почта для регистрации не настроена.")) {
+    return message;
+  }
+
+  if (message.startsWith("Не удалось отправить письмо подтверждения.")) {
+    return message;
+  }
+
   switch (message) {
     case "Invalid email or password":
       return "Неверный email или пароль.";
@@ -47,6 +59,8 @@ export function getAuthErrorMessage(message?: string) {
       return "Письма подтверждения пока не настроены на сервере.";
     case "Invalid token":
       return "Ссылка устарела или уже недействительна.";
+    case "HTTP_500":
+      return "Серверная ошибка при авторизации. Проверьте настройки почты и логи сервера.";
     default:
       return "Не удалось выполнить запрос авторизации.";
   }
