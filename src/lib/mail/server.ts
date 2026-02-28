@@ -52,10 +52,10 @@ async function sendMail({
   text: string;
   html: string;
 }) {
-  const transporter = getTransporter();
-  const env = getMailEnv();
-
   try {
+    const transporter = getTransporter();
+    const env = getMailEnv();
+
     await transporter.sendMail({
       from: env.from,
       to,
