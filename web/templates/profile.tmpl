@@ -122,7 +122,13 @@
               </div>
             </form>
 
-            <form class="article-form atlas-profile-form" method="post" action="/app/profile/avatar/upload" enctype="multipart/form-data">
+            <form
+              class="article-form atlas-profile-form"
+              method="post"
+              action="/app/profile/avatar/upload"
+              enctype="multipart/form-data"
+              data-avatar-upload-form
+              data-max-file-bytes="5242880">
               <input type="hidden" name="csrf_token" value="{{.CSRFToken}}" />
               <label class="field">
                 <span>Загрузить файл</span>

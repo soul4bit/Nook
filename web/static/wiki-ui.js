@@ -301,11 +301,210 @@
     }
   }
 
+  function parsePositiveInteger(value, fallback) {
+    const parsed = Number.parseInt(String(value || "").trim(), 10);
+    if (!Number.isFinite(parsed) || parsed <= 0) {
+      return fallback;
+    }
+    return parsed;
+  }
+
+  function formatMegabytes(bytes) {
+    const mb = bytes / (1024 * 1024);
+    if (Number.isInteger(mb)) {
+      return `${mb} MB`;
+    }
+    return `${mb.toFixed(1)} MB`;
+  }
+
+  function ensureAvatarUploadAlert(form) {
+    if (!(form instanceof HTMLFormElement)) {
+      return null;
+    }
+
+    const main = form.closest(".atlas-main");
+    if (!(main instanceof HTMLElement)) {
+      return null;
+    }
+
+    let node = main.querySelector("[data-avatar-upload-alert]");
+    if (node instanceof HTMLElement) {
+      return node;
+    }
+
+    node = document.createElement("p");
+    node.className = "alert alert-error";
+    node.setAttribute("data-avatar-upload-alert", "1");
+    node.hidden = true;
+
+    const card = form.closest(".atlas-card");
+    if (card && card.parentNode) {
+      card.parentNode.insertBefore(node, card);
+      return node;
+    }
+
+    main.prepend(node);
+    return node;
+  }
+
+  function setAvatarUploadAlert(form, message) {
+    const alertNode = ensureAvatarUploadAlert(form);
+    if (!(alertNode instanceof HTMLElement)) {
+      return;
+    }
+
+    const clean = String(message || "").trim();
+    if (clean === "") {
+      alertNode.hidden = true;
+      alertNode.textContent = "";
+      return;
+    }
+
+    alertNode.textContent = clean;
+    alertNode.hidden = false;
+  }
+
+  function extractErrorFromHTML(html) {
+    const source = String(html || "").trim();
+    if (source === "") {
+      return "";
+    }
+
+    try {
+      const parser = new window.DOMParser();
+      const doc = parser.parseFromString(source, "text/html");
+      const errorNode = doc.querySelector(".alert-error");
+      if (!(errorNode instanceof HTMLElement)) {
+        return "";
+      }
+      return errorNode.textContent ? errorNode.textContent.trim() : "";
+    } catch (_) {
+      return "";
+    }
+  }
+
+  function initProfileAvatarUploadUX() {
+    const forms = document.querySelectorAll("form[data-avatar-upload-form]");
+    for (const form of forms) {
+      if (!(form instanceof HTMLFormElement)) {
+        continue;
+      }
+
+      const fileInput = form.querySelector("input[name='avatar_file']");
+      if (!(fileInput instanceof HTMLInputElement)) {
+        continue;
+      }
+
+      const submitButton = form.querySelector("button[type='submit']");
+      const maxBytes = parsePositiveInteger(form.dataset.maxFileBytes, 5 * 1024 * 1024);
+      const maxBytesText = formatMegabytes(maxBytes);
+      let isSubmitting = false;
+
+      fileInput.addEventListener("change", () => {
+        const file = fileInput.files && fileInput.files.length > 0 ? fileInput.files[0] : null;
+        if (!file) {
+          setAvatarUploadAlert(form, "");
+          return;
+        }
+
+        if (file.size > maxBytes) {
+          setAvatarUploadAlert(form, `Файл слишком большой. Максимальный размер: ${maxBytesText}.`);
+          return;
+        }
+
+        setAvatarUploadAlert(form, "");
+      });
+
+      form.addEventListener("submit", async (event) => {
+        if (isSubmitting) {
+          event.preventDefault();
+          return;
+        }
+
+        const file = fileInput.files && fileInput.files.length > 0 ? fileInput.files[0] : null;
+        if (file && file.size > maxBytes) {
+          event.preventDefault();
+          setAvatarUploadAlert(form, `Файл слишком большой. Максимальный размер: ${maxBytesText}.`);
+          return;
+        }
+
+        event.preventDefault();
+        isSubmitting = true;
+        setAvatarUploadAlert(form, "");
+
+        if (submitButton instanceof HTMLButtonElement) {
+          submitButton.disabled = true;
+        }
+
+        try {
+          const response = await fetch(form.action, {
+            method: String(form.method || "POST").toUpperCase(),
+            body: new window.FormData(form),
+            credentials: "same-origin",
+          });
+
+          if (response.redirected) {
+            window.location.assign(response.url);
+            return;
+          }
+
+          if (response.status === 413) {
+            setAvatarUploadAlert(
+              form,
+              `Сервер отклонил загрузку (413 Request Entity Too Large). Попробуйте файл меньше ${maxBytesText}.`
+            );
+            return;
+          }
+
+          if (response.ok) {
+            const contentType = String(response.headers.get("content-type") || "").toLowerCase();
+            if (contentType.includes("text/html")) {
+              const html = await response.text();
+              const serverError = extractErrorFromHTML(html);
+              if (serverError !== "") {
+                setAvatarUploadAlert(form, serverError);
+                return;
+              }
+            }
+            window.location.reload();
+            return;
+          }
+
+          let message = "";
+          const contentType = String(response.headers.get("content-type") || "").toLowerCase();
+          if (!contentType.includes("text/html")) {
+            try {
+              message = String(await response.text()).trim();
+            } catch (_) {
+              message = "";
+            }
+            if (message.length > 240) {
+              message = "";
+            }
+          }
+          if (response.status === 403) {
+            setAvatarUploadAlert(form, message || "Сессия истекла. Обновите страницу и повторите попытку.");
+            return;
+          }
+          setAvatarUploadAlert(form, message || "Не удалось загрузить файл. Попробуйте ещё раз.");
+        } catch (_) {
+          setAvatarUploadAlert(form, "Ошибка сети при загрузке файла. Попробуйте ещё раз.");
+        } finally {
+          isSubmitting = false;
+          if (submitButton instanceof HTMLButtonElement) {
+            submitButton.disabled = false;
+          }
+        }
+      });
+    }
+  }
+
   document.addEventListener("DOMContentLoaded", () => {
     initSkipLink();
     initSidebarSearch();
     initGlobalHotkeys();
     initReadingProgress();
+    initProfileAvatarUploadUX();
 
     // Wait until editor scripts finish moving textarea nodes inside wrappers.
     window.setTimeout(() => {
