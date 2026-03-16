@@ -92,6 +92,9 @@ func initializeWikiCatalog(db *sql.DB) error {
 	if err := ensureWikiCatalogSeed(db); err != nil {
 		return err
 	}
+	if err := ensureDefaultVirtualizationSection(db); err != nil {
+		return err
+	}
 
 	sections, err := loadWikiSectionsFromDB(db)
 	if err != nil {
@@ -152,6 +155,92 @@ func ensureWikiCatalogSeed(db *sql.DB) error {
 			); err != nil {
 				return err
 			}
+		}
+	}
+
+	return tx.Commit()
+}
+
+func ensureDefaultVirtualizationSection(db *sql.DB) error {
+	if db == nil {
+		return nil
+	}
+
+	const virtualizationSlug = "virtualization"
+
+	var exists bool
+	if err := db.QueryRow(
+		`select exists(select 1 from wiki_sections where slug = $1)`,
+		virtualizationSlug,
+	).Scan(&exists); err != nil {
+		return err
+	}
+	if exists {
+		return nil
+	}
+
+	var sectionToSeed *wikiSection
+	for _, section := range defaultWikiSections() {
+		if normalizeWikiSectionSlug(section.Slug) != virtualizationSlug {
+			continue
+		}
+		copySection := section
+		sectionToSeed = &copySection
+		break
+	}
+	if sectionToSeed == nil {
+		return nil
+	}
+
+	cleanName := strings.TrimSpace(sectionToSeed.Name)
+	if cleanName == "" {
+		return nil
+	}
+
+	tx, err := db.Begin()
+	if err != nil {
+		return err
+	}
+	defer func() {
+		_ = tx.Rollback()
+	}()
+
+	var nextPosition int
+	if err := tx.QueryRow(`select coalesce(max(position), 0) + 1 from wiki_sections`).Scan(&nextPosition); err != nil {
+		return err
+	}
+
+	var sectionID int64
+	insertErr := tx.QueryRow(
+		`insert into wiki_sections (slug, name, position)
+		values ($1, $2, $3)
+		on conflict do nothing
+		returning id`,
+		virtualizationSlug,
+		cleanName,
+		nextPosition,
+	).Scan(&sectionID)
+	if errors.Is(insertErr, sql.ErrNoRows) {
+		return tx.Commit()
+	}
+	if insertErr != nil {
+		return insertErr
+	}
+
+	for subsectionPosition, subsection := range sectionToSeed.Subsections {
+		title := strings.TrimSpace(subsection)
+		if title == "" {
+			continue
+		}
+		if _, err := tx.Exec(
+			`insert into wiki_subsections (section_id, title, position)
+			values ($1, $2, $3)
+			on conflict do nothing`,
+			sectionID,
+			title,
+			subsectionPosition+1,
+		); err != nil {
+			return err
 		}
 	}
 

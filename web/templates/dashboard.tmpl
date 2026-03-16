@@ -121,6 +121,27 @@
           <p class="alert alert-success">{{.Success}}</p>
         {{end}}
 
+        {{if .SectionOverviews}}
+          <article class="atlas-card atlas-section-overview-card">
+            <div class="atlas-recent-head atlas-section-overview-head">
+              <div class="atlas-recent-title-wrap">
+                <p class="panel-label">Knowledge map</p>
+                <p class="atlas-recent-note">Quick jump to any domain with the first topic and article count.</p>
+              </div>
+              <span class="atlas-recent-count">{{len .SectionOverviews}} sections</span>
+            </div>
+            <div class="atlas-section-overview-grid">
+              {{range .SectionOverviews}}
+                <a class="atlas-section-overview-item" href="/app/section?slug={{.Slug}}">
+                  <span class="atlas-section-overview-name">{{.Name}}</span>
+                  <span class="atlas-section-overview-lead">{{.Lead}}</span>
+                  <span class="atlas-section-overview-meta">{{.Count}} articles</span>
+                </a>
+              {{end}}
+            </div>
+          </article>
+        {{end}}
+
         <article class="atlas-card atlas-recent-card">
           <div class="atlas-recent-head">
             <div class="atlas-recent-title-wrap">

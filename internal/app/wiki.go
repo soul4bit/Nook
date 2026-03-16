@@ -33,6 +33,16 @@ var defaultWikiSectionCatalog = []wikiSection{
 		},
 	},
 	{
+		Slug: "virtualization",
+		Name: "Virtualization",
+		Subsections: []string{
+			"KVM/libvirt",
+			"Proxmox VE",
+			"VirtualBox and Vagrant",
+			"Cloud-init templates",
+		},
+	},
+	{
 		Slug: "network",
 		Name: "Сети",
 		Subsections: []string{

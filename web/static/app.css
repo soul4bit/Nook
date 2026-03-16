@@ -2163,6 +2163,103 @@ body {
   line-height: 1.6;
 }
 
+.atlas-section-overview-card {
+  position: relative;
+  overflow: hidden;
+  border-color: #b7d2c9;
+  background:
+    radial-gradient(circle at 100% -12%, rgba(13, 118, 109, 0.16), transparent 36%),
+    radial-gradient(circle at 0% 100%, rgba(204, 151, 86, 0.12), transparent 40%),
+    linear-gradient(145deg, rgba(236, 247, 243, 0.96), rgba(250, 252, 251, 0.96));
+}
+
+.atlas-section-overview-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(13, 118, 109, 0.8), rgba(204, 151, 86, 0.75));
+  pointer-events: none;
+}
+
+.atlas-section-overview-grid {
+  margin-top: 16px;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}
+
+.atlas-section-overview-item {
+  position: relative;
+  display: grid;
+  gap: 8px;
+  min-height: 124px;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid #c4d8d0;
+  color: #1f4d45;
+  text-decoration: none;
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.96), rgba(242, 249, 246, 0.95));
+  box-shadow: 0 9px 22px rgba(20, 64, 54, 0.08);
+  transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.atlas-section-overview-item::after {
+  content: "";
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  top: 10px;
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #0d766d, #0a5b54, #cc9753);
+}
+
+.atlas-section-overview-item:hover {
+  transform: translateY(-2px);
+  border-color: #99c1b5;
+  box-shadow: 0 14px 30px rgba(20, 64, 54, 0.13);
+}
+
+.atlas-section-overview-item:focus-visible {
+  outline: 2px solid #0d766d;
+  outline-offset: 2px;
+}
+
+.atlas-section-overview-name {
+  margin-top: 8px;
+  color: #1a483f;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.22;
+}
+
+.atlas-section-overview-lead {
+  color: #4e6861;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.atlas-section-overview-meta {
+  align-self: end;
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 9px;
+  border-radius: 999px;
+  border: 1px solid #c0d7cf;
+  background: rgba(255, 255, 255, 0.86);
+  color: #2b6057;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  font-family: "IBM Plex Mono", "Consolas", monospace;
+}
+
 .atlas-recent-card {
   position: relative;
   overflow: hidden;
@@ -4297,10 +4394,9 @@ html {
 }
 
 .atlas-nav {
-  max-height: min(60dvh, 700px);
-  overflow-y: auto;
-  padding-right: 3px;
-  scrollbar-gutter: stable;
+  max-height: none;
+  overflow: visible;
+  padding-right: 0;
 }
 
 .atlas-nav::-webkit-scrollbar {

@@ -39,6 +39,16 @@ func TestSetWikiSectionCatalogFallbackToDefault(t *testing.T) {
 	}
 }
 
+func TestDefaultWikiSectionsIncludeVirtualization(t *testing.T) {
+	sections := defaultWikiSections()
+	for _, section := range sections {
+		if normalizeWikiSectionSlug(section.Slug) == "virtualization" {
+			return
+		}
+	}
+	t.Fatal("default wiki catalog must include virtualization section")
+}
+
 func TestNormalizeMoveDirection(t *testing.T) {
 	tests := []struct {
 		raw      string
