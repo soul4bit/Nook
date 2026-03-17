@@ -1,4 +1,4 @@
-(() => {
+﻿(() => {
   const BLOCK_ACTIONS = {
     h1: "# ",
     h2: "## ",
@@ -201,6 +201,32 @@
     textarea.setRangeText(transformed, lineStart, lineEnd, "end");
     textarea.setSelectionRange(lineStart, lineStart + transformed.length);
     textarea.dispatchEvent(new Event("input", { bubbles: true }));
+    return true;
+  }
+
+  function handleUndoRedoShortcuts(textarea, event) {
+    if (!(event.ctrlKey || event.metaKey) || event.altKey) {
+      return false;
+    }
+
+    const key = String(event.key || "").toLowerCase();
+    const wantsUndo = key === "z" && !event.shiftKey;
+    const wantsRedo = key === "y" || (key === "z" && event.shiftKey);
+    if (!wantsUndo && !wantsRedo) {
+      return false;
+    }
+
+    event.preventDefault();
+    textarea.focus();
+
+    try {
+      if (typeof document.execCommand === "function") {
+        document.execCommand(wantsUndo ? "undo" : "redo");
+      }
+    } catch (_) {
+      // Ignore unsupported environments.
+    }
+
     return true;
   }
 
@@ -666,10 +692,25 @@
         continue;
       }
 
-      if (/\*\*[^*\n]*\s\*\*/.test(line) || /\*\*\s[^*\n]*\*\*/.test(line)) {
+      const normalizedLine = line
+        .replace(/`[^`\n]*`/g, "")
+        .replace(/\\\*/g, "");
+      const strongPattern = /(^|[^\\])\*\*([^*\n]+)\*\*/g;
+      let hasBoldSpaceIssue = false;
+      let strongMatch = strongPattern.exec(normalizedLine);
+      while (strongMatch) {
+        const content = strongMatch[2] || "";
+        if (/^\s|\s$/.test(content)) {
+          hasBoldSpaceIssue = true;
+          break;
+        }
+        strongMatch = strongPattern.exec(normalizedLine);
+      }
+
+      if (hasBoldSpaceIssue) {
         issues.push({
           line: lineNumber,
-          message: "Пробел внутри **...**: в финале может показаться сырой markdown.",
+          message: "РџСЂРѕР±РµР» РІРЅСѓС‚СЂРё **...**: РІ С„РёРЅР°Р»Рµ РјРѕР¶РµС‚ РїРѕРєР°Р·Р°С‚СЊСЃСЏ СЃС‹СЂРѕР№ markdown.",
         });
       }
 
@@ -679,7 +720,7 @@
         if (!sanitizeURL(rawURL)) {
           issues.push({
             line: lineNumber,
-            message: "Ссылка/картинка с некорректным URL (только http/https).",
+            message: "РЎСЃС‹Р»РєР°/РєР°СЂС‚РёРЅРєР° СЃ РЅРµРєРѕСЂСЂРµРєС‚РЅС‹Рј URL (С‚РѕР»СЊРєРѕ http/https).",
           });
         }
       }
@@ -688,7 +729,7 @@
     if (fenceOpenLine !== 0) {
       issues.push({
         line: fenceOpenLine,
-        message: "Незакрытый код-блок ```.",
+        message: "РќРµР·Р°РєСЂС‹С‚С‹Р№ РєРѕРґ-Р±Р»РѕРє ```.",
       });
     }
 
@@ -795,10 +836,10 @@
       const items = issues
         .map(
           (issue) =>
-            `<li><button type="button" class="atlas-md-lint-link" data-md-line="${issue.line}">Строка ${issue.line}</button><span>${escapeHTML(issue.message)}</span></li>`
+            `<li><button type="button" class="atlas-md-lint-link" data-md-line="${issue.line}">РЎС‚СЂРѕРєР° ${issue.line}</button><span>${escapeHTML(issue.message)}</span></li>`
         )
         .join("");
-      lint.innerHTML = `<p class="atlas-md-lint-title">Проверьте Markdown:</p><ul class="atlas-md-lint-list">${items}</ul>`;
+      lint.innerHTML = `<p class="atlas-md-lint-title">РџСЂРѕРІРµСЂСЊС‚Рµ Markdown:</p><ul class="atlas-md-lint-list">${items}</ul>`;
     };
 
     const setMode = (mode) => {
@@ -908,6 +949,9 @@
     });
 
     textarea.addEventListener("keydown", (event) => {
+      if (handleUndoRedoShortcuts(textarea, event)) {
+        return;
+      }
       if (handleEditorTab(textarea, event)) {
         return;
       }
@@ -989,3 +1033,4 @@
     }
   });
 })();
+
