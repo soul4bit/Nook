@@ -9,6 +9,10 @@
     task: "- [ ] ",
   };
   const MAX_IMAGE_UPLOAD_BYTES = 10 * 1024 * 1024;
+  const INLINE_WRAPPERS_WITH_TRIM = new Set(["**", "*", "~~", "`"]);
+  const TASK_LIST_PATTERN = /^(\s*)([-+*])\s+\[(?: |x|X)\]\s?(.*)$/;
+  const UNORDERED_LIST_PATTERN = /^(\s*)([-+*])\s+(.*)$/;
+  const ORDERED_LIST_PATTERN = /^(\s*)(\d+)\.\s+(.*)$/;
 
   function escapeHTML(value) {
     return value
@@ -45,13 +49,99 @@
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
     const source = textarea.value;
-    const selected = source.slice(start, end) || placeholder;
-    const replacement = `${before}${selected}${after}`;
+    const selectedRaw = source.slice(start, end);
+    const selected = selectedRaw || placeholder;
+    let replacement = `${before}${selected}${after}`;
+
+    // Keep accidental outer spaces outside the formatting markers:
+    // "word " + bold -> "**word** " instead of "**word **".
+    if (selectedRaw !== "" && before === after && INLINE_WRAPPERS_WITH_TRIM.has(before)) {
+      const leading = selectedRaw.match(/^\s+/)?.[0] || "";
+      const trailing = selectedRaw.match(/\s+$/)?.[0] || "";
+      const middle = selectedRaw.slice(leading.length, selectedRaw.length - trailing.length);
+      if (middle !== "") {
+        replacement = `${leading}${before}${middle}${after}${trailing}`;
+      }
+    }
+
     textarea.setRangeText(replacement, start, end, "end");
     const cursorPos = start + replacement.length;
     textarea.setSelectionRange(cursorPos, cursorPos);
     textarea.dispatchEvent(new Event("input", { bubbles: true }));
     textarea.focus();
+  }
+
+  function detectListContinuation(line) {
+    const taskMatch = line.match(TASK_LIST_PATTERN);
+    if (taskMatch) {
+      const [, indent, marker, content] = taskMatch;
+      return {
+        empty: content.trim() === "",
+        continuation: `${indent}${marker} [ ] `,
+        clearLine: indent,
+      };
+    }
+
+    const orderedMatch = line.match(ORDERED_LIST_PATTERN);
+    if (orderedMatch) {
+      const [, indent, numberRaw, content] = orderedMatch;
+      const currentNumber = Number.parseInt(numberRaw, 10);
+      const nextNumber = Number.isFinite(currentNumber) ? currentNumber + 1 : 1;
+      return {
+        empty: content.trim() === "",
+        continuation: `${indent}${nextNumber}. `,
+        clearLine: indent,
+      };
+    }
+
+    const unorderedMatch = line.match(UNORDERED_LIST_PATTERN);
+    if (unorderedMatch) {
+      const [, indent, marker, content] = unorderedMatch;
+      return {
+        empty: content.trim() === "",
+        continuation: `${indent}${marker} `,
+        clearLine: indent,
+      };
+    }
+
+    return null;
+  }
+
+  function handleEditorEnter(textarea, event) {
+    if (event.key !== "Enter" || event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) {
+      return;
+    }
+    if (textarea.selectionStart !== textarea.selectionEnd) {
+      return;
+    }
+
+    const cursor = textarea.selectionStart;
+    const source = textarea.value;
+    const lineStart = source.lastIndexOf("\n", Math.max(0, cursor - 1)) + 1;
+    let lineEnd = source.indexOf("\n", cursor);
+    if (lineEnd === -1) {
+      lineEnd = source.length;
+    }
+
+    const line = source.slice(lineStart, lineEnd);
+    const list = detectListContinuation(line);
+    if (!list) {
+      return;
+    }
+
+    event.preventDefault();
+
+    if (list.empty) {
+      textarea.setRangeText(list.clearLine, lineStart, lineEnd, "end");
+      const cursorPos = lineStart + list.clearLine.length;
+      textarea.setSelectionRange(cursorPos, cursorPos);
+    } else {
+      textarea.setRangeText(`\n${list.continuation}`, cursor, cursor, "end");
+      const cursorPos = cursor + 1 + list.continuation.length;
+      textarea.setSelectionRange(cursorPos, cursorPos);
+    }
+
+    textarea.dispatchEvent(new Event("input", { bubbles: true }));
   }
 
   function prefixSelectionLines(textarea, prefix) {
@@ -542,6 +632,10 @@
       if (!preview.hidden) {
         preview.innerHTML = renderMarkdown(textarea.value.trim());
       }
+    });
+
+    textarea.addEventListener("keydown", (event) => {
+      handleEditorEnter(textarea, event);
     });
   }
 
