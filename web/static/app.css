@@ -4373,16 +4373,54 @@ html {
   transition: transform 0.1s linear;
 }
 
+.atlas-article-view-content {
+  border-color: #b9d1c9;
+  background:
+    radial-gradient(circle at 98% -16%, rgba(221, 143, 71, 0.18), transparent 38%),
+    linear-gradient(155deg, rgba(252, 255, 254, 0.98), rgba(239, 248, 244, 0.96));
+  padding: clamp(20px, 2.4vw, 34px);
+}
+
 .atlas-article-view-body {
   margin: 0 auto;
-  max-width: 82ch;
-  font-size: 1.03rem;
+  max-width: 92ch;
+  font-size: clamp(1.03rem, 0.24vw + 0.99rem, 1.12rem);
+  line-height: 1.8;
+}
+
+.atlas-article-view-body > p:first-of-type {
+  font-size: 1.12em;
+  line-height: 1.76;
+  color: #22463f;
+}
+
+.atlas-article-view-body h1 {
+  font-size: clamp(36px, 3.2vw, 46px);
+}
+
+.atlas-article-view-body h2 {
+  font-size: clamp(30px, 2.5vw, 39px);
+}
+
+.atlas-article-view-body h3 {
+  font-size: clamp(24px, 2vw, 31px);
 }
 
 .atlas-article-view-body p,
 .atlas-article-view-body li,
 .atlas-article-view-body blockquote {
   text-wrap: pretty;
+}
+
+@media (max-width: 700px) {
+  .atlas-article-view-content {
+    padding: 16px;
+  }
+
+  .atlas-article-view-body {
+    max-width: 100%;
+    font-size: 1rem;
+  }
 }
 
 .article-form[data-article-autosave] .atlas-actions {
