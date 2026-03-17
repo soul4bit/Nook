@@ -87,7 +87,7 @@
                 <input type="hidden" name="article_id" value="{{.CurrentArticle.ID}}" />
                 <input type="hidden" name="action" value="{{if .ArticleLikedByUser}}unlike{{else}}like{{end}}" />
                 <button class="button button-ghost button-compact {{if .ArticleLikedByUser}}atlas-like-button-active{{end}}" type="submit">
-                  {{if .ArticleLikedByUser}}Убрать лайк{{else}}Лайк +10 автору{{end}}
+                  {{if .ArticleLikedByUser}}Убрать лайк{{else}}Лайк{{end}}
                 </button>
               </form>
             {{else}}
@@ -114,7 +114,7 @@
         {{end}}
 
         <article class="atlas-card">
-          <div class="atlas-article-view-body">{{.ArticleBodyHTML}}</div>
+          <div class="atlas-article-view-body">{{markdown .CurrentArticle.Body}}</div>
         </article>
 
         <article class="atlas-card atlas-comments-card">
