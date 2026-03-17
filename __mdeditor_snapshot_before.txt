@@ -9,7 +9,6 @@
     task: "- [ ] ",
   };
   const MAX_IMAGE_UPLOAD_BYTES = 10 * 1024 * 1024;
-  const MAX_LINT_ISSUES = 8;
   const INLINE_WRAPPERS_WITH_TRIM = new Set(["**", "*", "~~", "`"]);
   const TASK_LIST_PATTERN = /^(\s*)([-+*])\s+\[(?: |x|X)\]\s?(.*)$/;
   const UNORDERED_LIST_PATTERN = /^(\s*)([-+*])\s+(.*)$/;
@@ -145,100 +144,6 @@
     textarea.dispatchEvent(new Event("input", { bubbles: true }));
   }
 
-  function handleEditorTab(textarea, event) {
-    if (event.key !== "Tab" || event.ctrlKey || event.altKey || event.metaKey) {
-      return false;
-    }
-
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const source = textarea.value;
-    event.preventDefault();
-
-    if (start === end) {
-      if (event.shiftKey) {
-        const lineStart = source.lastIndexOf("\n", Math.max(0, start - 1)) + 1;
-        if (source.startsWith("\t", lineStart)) {
-          textarea.setRangeText("", lineStart, lineStart + 1, "end");
-          const cursorPos = Math.max(lineStart, start - 1);
-          textarea.setSelectionRange(cursorPos, cursorPos);
-        } else if (source.startsWith("  ", lineStart)) {
-          textarea.setRangeText("", lineStart, lineStart + 2, "end");
-          const cursorPos = Math.max(lineStart, start - 2);
-          textarea.setSelectionRange(cursorPos, cursorPos);
-        }
-      } else {
-        textarea.setRangeText("  ", start, end, "end");
-      }
-
-      textarea.dispatchEvent(new Event("input", { bubbles: true }));
-      return true;
-    }
-
-    const lineStart = source.lastIndexOf("\n", Math.max(0, start - 1)) + 1;
-    let lineEnd = source.indexOf("\n", end);
-    if (lineEnd === -1) {
-      lineEnd = source.length;
-    }
-
-    const block = source.slice(lineStart, lineEnd);
-    const lines = block.split("\n");
-    const transformed = lines
-      .map((line) => {
-        if (!event.shiftKey) {
-          return `  ${line}`;
-        }
-        if (line.startsWith("  ")) {
-          return line.slice(2);
-        }
-        if (line.startsWith("\t")) {
-          return line.slice(1);
-        }
-        return line;
-      })
-      .join("\n");
-
-    textarea.setRangeText(transformed, lineStart, lineEnd, "end");
-    textarea.setSelectionRange(lineStart, lineStart + transformed.length);
-    textarea.dispatchEvent(new Event("input", { bubbles: true }));
-    return true;
-  }
-
-  function insertMarkdownLinkForSelection(textarea, url) {
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const selectedRaw = textarea.value.slice(start, end);
-    const leading = selectedRaw.match(/^\s+/)?.[0] || "";
-    const trailing = selectedRaw.match(/\s+$/)?.[0] || "";
-    const middle = selectedRaw.slice(leading.length, selectedRaw.length - trailing.length).trim();
-    const label = middle || "link";
-    const replacement = `${leading}[${label}](${url})${trailing}`;
-    textarea.setRangeText(replacement, start, end, "end");
-    const cursorPos = start + replacement.length;
-    textarea.setSelectionRange(cursorPos, cursorPos);
-    textarea.dispatchEvent(new Event("input", { bubbles: true }));
-  }
-
-  function handlePasteURLOverSelection(textarea, event) {
-    if (!(event.clipboardData instanceof DataTransfer)) {
-      return false;
-    }
-    if (textarea.selectionStart === textarea.selectionEnd) {
-      return false;
-    }
-
-    const rawURL = event.clipboardData.getData("text/plain");
-    const safeURL = sanitizeURL(rawURL);
-    if (!safeURL) {
-      return false;
-    }
-
-    event.preventDefault();
-    insertMarkdownLinkForSelection(textarea, safeURL);
-    textarea.focus();
-    return true;
-  }
-
   function prefixSelectionLines(textarea, prefix) {
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
@@ -322,143 +227,83 @@
     return value.replace(/[[\]\\]/g, "\\$&");
   }
 
-  function isImageFile(file) {
-    return !!(file instanceof File && typeof file.type === "string" && file.type.startsWith("image/"));
-  }
-
-  async function uploadImageFile(textarea, file, options) {
+  async function uploadAndInsertImage(textarea, options) {
     const uploadEndpoint = String(options && options.uploadEndpoint ? options.uploadEndpoint : "").trim();
     const csrfToken = String(options && options.csrfToken ? options.csrfToken : "").trim();
 
     if (!uploadEndpoint) {
       window.alert("Image upload is unavailable in this environment.");
-      return false;
-    }
-    if (!isImageFile(file)) {
-      window.alert("Choose an image file.");
-      return false;
-    }
-    if (file.size > MAX_IMAGE_UPLOAD_BYTES) {
-      window.alert("Max file size is 10 MB.");
-      return false;
+      return;
     }
 
-    const fallbackRangeStart = textarea.selectionStart;
-    const fallbackRangeEnd = textarea.selectionEnd;
-    const rangeStart = Number.isFinite(options && options.selectionStart)
-      ? Number(options.selectionStart)
-      : fallbackRangeStart;
-    const rangeEnd = Number.isFinite(options && options.selectionEnd)
-      ? Number(options.selectionEnd)
-      : fallbackRangeEnd;
-    const selectedText = textarea.value.slice(rangeStart, rangeEnd).trim();
+    const selectionStart = textarea.selectionStart;
+    const selectionEnd = textarea.selectionEnd;
+    const selectedText = textarea.value.slice(selectionStart, selectionEnd).trim();
 
-    const formData = new FormData();
-    formData.set("file", file, file.name || "image");
-
-    try {
-      const response = await fetch(uploadEndpoint, {
-        method: "POST",
-        credentials: "same-origin",
-        headers: {
-          Accept: "application/json",
-          "X-Requested-With": "fetch",
-          ...(csrfToken ? { "X-CSRF-Token": csrfToken } : {}),
-        },
-        body: formData,
-      });
-
-      const data = await response.json().catch(() => null);
-      if (!response.ok || !data || data.ok !== true || typeof data.url !== "string" || data.url.trim() === "") {
-        const message = data && typeof data.error === "string" ? data.error : "Upload failed.";
-        throw new Error(message);
-      }
-
-      const safeURL = sanitizeURL(data.url);
-      if (!safeURL) {
-        throw new Error("Server returned an invalid URL.");
-      }
-
-      const alt = sanitizeMarkdownAltText(selectedText || suggestAltFromFilename(file.name));
-      const markdownImage = `![${alt}](${safeURL})`;
-      textarea.setRangeText(markdownImage, rangeStart, rangeEnd, "end");
-      const cursorPos = rangeStart + markdownImage.length;
-      textarea.setSelectionRange(cursorPos, cursorPos);
-      textarea.dispatchEvent(new Event("input", { bubbles: true }));
-      textarea.focus();
-      return true;
-    } catch (error) {
-      const fallback = "Image upload failed.";
-      const message = error instanceof Error && error.message ? error.message : fallback;
-      window.alert(message);
-      return false;
-    }
-  }
-
-  async function uploadAndInsertImage(textarea, options) {
     const picker = document.createElement("input");
     picker.type = "file";
     picker.accept = "image/jpeg,image/png,image/gif,image/webp";
 
     picker.addEventListener(
       "change",
-      () => {
+      async () => {
         const file = picker.files && picker.files[0];
         if (!file) {
           return;
         }
-        void uploadImageFile(textarea, file, {
-          ...options,
-          selectionStart: textarea.selectionStart,
-          selectionEnd: textarea.selectionEnd,
-        });
+
+        if (typeof file.type === "string" && !file.type.startsWith("image/")) {
+          window.alert("Choose an image file.");
+          return;
+        }
+        if (file.size > MAX_IMAGE_UPLOAD_BYTES) {
+          window.alert("Max file size is 10 MB.");
+          return;
+        }
+
+        const formData = new FormData();
+        formData.set("file", file, file.name || "image");
+
+        try {
+          const response = await fetch(uploadEndpoint, {
+            method: "POST",
+            credentials: "same-origin",
+            headers: {
+              Accept: "application/json",
+              "X-Requested-With": "fetch",
+              ...(csrfToken ? { "X-CSRF-Token": csrfToken } : {}),
+            },
+            body: formData,
+          });
+
+          const data = await response.json().catch(() => null);
+          if (!response.ok || !data || data.ok !== true || typeof data.url !== "string" || data.url.trim() === "") {
+            const message = data && typeof data.error === "string" ? data.error : "Upload failed.";
+            throw new Error(message);
+          }
+
+          const safeURL = sanitizeURL(data.url);
+          if (!safeURL) {
+            throw new Error("Server returned an invalid URL.");
+          }
+
+          const alt = sanitizeMarkdownAltText(selectedText || suggestAltFromFilename(file.name));
+          const markdownImage = `![${alt}](${safeURL})`;
+          textarea.setRangeText(markdownImage, selectionStart, selectionEnd, "end");
+          const cursorPos = selectionStart + markdownImage.length;
+          textarea.setSelectionRange(cursorPos, cursorPos);
+          textarea.dispatchEvent(new Event("input", { bubbles: true }));
+          textarea.focus();
+        } catch (error) {
+          const fallback = "Image upload failed.";
+          const message = error instanceof Error && error.message ? error.message : fallback;
+          window.alert(message);
+        }
       },
       { once: true }
     );
 
     picker.click();
-  }
-
-  function handlePasteImageUpload(textarea, event, options) {
-    if (!(event.clipboardData instanceof DataTransfer)) {
-      return false;
-    }
-
-    const items = Array.from(event.clipboardData.items || []);
-    const imageItem = items.find((item) => item.kind === "file" && item.type.startsWith("image/"));
-    if (!imageItem) {
-      return false;
-    }
-
-    const file = imageItem.getAsFile();
-    if (!file) {
-      return false;
-    }
-
-    event.preventDefault();
-    const selectionStart = textarea.selectionStart;
-    const selectionEnd = textarea.selectionEnd;
-    void uploadImageFile(textarea, file, { ...options, selectionStart, selectionEnd });
-    return true;
-  }
-
-  function handleDropImageUpload(textarea, event, options) {
-    if (!(event.dataTransfer instanceof DataTransfer)) {
-      return false;
-    }
-
-    const files = Array.from(event.dataTransfer.files || []);
-    const image = files.find((file) => isImageFile(file));
-    if (!image) {
-      return false;
-    }
-
-    event.preventDefault();
-    textarea.focus();
-    const selectionStart = textarea.selectionStart;
-    const selectionEnd = textarea.selectionEnd;
-    void uploadImageFile(textarea, image, { ...options, selectionStart, selectionEnd });
-    return true;
   }
 
   function renderInline(markdown) {
@@ -644,57 +489,6 @@
     return chunks.join("");
   }
 
-  function collectMarkdownLintIssues(markdown) {
-    const lines = String(markdown || "").replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n");
-    const issues = [];
-    let fenceOpenLine = 0;
-
-    for (let idx = 0; idx < lines.length; idx += 1) {
-      const lineNumber = idx + 1;
-      const line = lines[idx];
-      const fenceMatch = line.match(/^```/);
-      if (fenceMatch) {
-        if (fenceOpenLine === 0) {
-          fenceOpenLine = lineNumber;
-        } else {
-          fenceOpenLine = 0;
-        }
-        continue;
-      }
-
-      if (fenceOpenLine !== 0) {
-        continue;
-      }
-
-      if (/\*\*[^*\n]*\s\*\*/.test(line) || /\*\*\s[^*\n]*\*\*/.test(line)) {
-        issues.push({
-          line: lineNumber,
-          message: "Пробел внутри **...**: в финале может показаться сырой markdown.",
-        });
-      }
-
-      const links = line.matchAll(/!?\[[^\]]*]\(([^)\s]+)\)/g);
-      for (const match of links) {
-        const rawURL = match[1] || "";
-        if (!sanitizeURL(rawURL)) {
-          issues.push({
-            line: lineNumber,
-            message: "Ссылка/картинка с некорректным URL (только http/https).",
-          });
-        }
-      }
-    }
-
-    if (fenceOpenLine !== 0) {
-      issues.push({
-        line: fenceOpenLine,
-        message: "Незакрытый код-блок ```.",
-      });
-    }
-
-    return issues.slice(0, MAX_LINT_ISSUES);
-  }
-
   function buildToolbarButton(label, action, titleText) {
     const button = document.createElement("button");
     button.type = "button";
@@ -749,72 +543,30 @@
     writeBtn.dataset.mdMode = "write";
     const previewBtn = buildToolbarButton("Preview", "mode-preview", "Preview rendered markdown");
     previewBtn.dataset.mdMode = "preview";
-    const splitBtn = buildToolbarButton("Split", "mode-split", "Write and preview side by side");
-    splitBtn.dataset.mdMode = "split";
 
-    modeSwitch.append(writeBtn, previewBtn, splitBtn);
+    modeSwitch.append(writeBtn, previewBtn);
     toolbar.append(modeSwitch);
-
-    const body = document.createElement("div");
-    body.className = "atlas-md-body";
 
     const preview = document.createElement("div");
     preview.className = "atlas-md-preview";
     preview.hidden = true;
-
-    const lint = document.createElement("div");
-    lint.className = "atlas-md-lint";
-    lint.hidden = true;
 
     textarea.classList.add("atlas-md-input");
     textarea.dataset.mdEditorReady = "1";
 
     textarea.parentNode.insertBefore(wrapper, textarea);
     wrapper.append(toolbar);
-    wrapper.append(body);
-    body.append(textarea);
-    body.append(preview);
-    wrapper.append(lint);
-
-    let currentMode = "write";
-    let syncLock = false;
-
-    const renderPreview = () => {
-      preview.innerHTML = renderMarkdown(textarea.value.trim());
-    };
-
-    const renderLint = () => {
-      const issues = collectMarkdownLintIssues(textarea.value);
-      if (issues.length === 0) {
-        lint.hidden = true;
-        lint.innerHTML = "";
-        return;
-      }
-
-      lint.hidden = false;
-      const items = issues
-        .map(
-          (issue) =>
-            `<li><button type="button" class="atlas-md-lint-link" data-md-line="${issue.line}">Строка ${issue.line}</button><span>${escapeHTML(issue.message)}</span></li>`
-        )
-        .join("");
-      lint.innerHTML = `<p class="atlas-md-lint-title">Проверьте Markdown:</p><ul class="atlas-md-lint-list">${items}</ul>`;
-    };
+    wrapper.append(textarea);
+    wrapper.append(preview);
 
     const setMode = (mode) => {
-      currentMode = mode;
       const previewMode = mode === "preview";
-      const splitMode = mode === "split";
-      writeBtn.classList.toggle("atlas-md-btn-active", mode === "write");
+      writeBtn.classList.toggle("atlas-md-btn-active", !previewMode);
       previewBtn.classList.toggle("atlas-md-btn-active", previewMode);
-      splitBtn.classList.toggle("atlas-md-btn-active", splitMode);
-      wrapper.classList.toggle("atlas-md-editor-split", splitMode);
-
       textarea.hidden = previewMode;
-      preview.hidden = !(previewMode || splitMode);
-
-      if (previewMode || splitMode) {
-        renderPreview();
+      preview.hidden = !previewMode;
+      if (previewMode) {
+        preview.innerHTML = renderMarkdown(textarea.value.trim());
       }
     };
 
@@ -871,112 +623,20 @@
         case "mode-preview":
           setMode("preview");
           break;
-        case "mode-split":
-          setMode("split");
-          break;
         default:
           break;
       }
     });
 
     textarea.addEventListener("input", () => {
-      if (currentMode === "preview" || currentMode === "split") {
-        renderPreview();
+      if (!preview.hidden) {
+        preview.innerHTML = renderMarkdown(textarea.value.trim());
       }
-      renderLint();
-    });
-
-    const syncScroll = (sourceNode, targetNode) => {
-      if (syncLock || currentMode !== "split") {
-        return;
-      }
-
-      syncLock = true;
-      const sourceMax = Math.max(sourceNode.scrollHeight - sourceNode.clientHeight, 1);
-      const targetMax = Math.max(targetNode.scrollHeight - targetNode.clientHeight, 1);
-      const ratio = sourceNode.scrollTop / sourceMax;
-      targetNode.scrollTop = ratio * targetMax;
-      syncLock = false;
-    };
-
-    textarea.addEventListener("scroll", () => {
-      syncScroll(textarea, preview);
-    });
-
-    preview.addEventListener("scroll", () => {
-      syncScroll(preview, textarea);
     });
 
     textarea.addEventListener("keydown", (event) => {
-      if (handleEditorTab(textarea, event)) {
-        return;
-      }
       handleEditorEnter(textarea, event);
     });
-
-    textarea.addEventListener("paste", (event) => {
-      if (uploadEndpoint && handlePasteImageUpload(textarea, event, { uploadEndpoint, csrfToken })) {
-        return;
-      }
-      handlePasteURLOverSelection(textarea, event);
-    });
-
-    wrapper.addEventListener("dragover", (event) => {
-      if (!(event.dataTransfer instanceof DataTransfer)) {
-        return;
-      }
-
-      const hasImage = Array.from(event.dataTransfer.items || []).some(
-        (item) => item.kind === "file" && item.type.startsWith("image/")
-      );
-      if (!hasImage) {
-        return;
-      }
-
-      event.preventDefault();
-      wrapper.classList.add("atlas-md-editor-dragover");
-    });
-
-    wrapper.addEventListener("dragleave", () => {
-      wrapper.classList.remove("atlas-md-editor-dragover");
-    });
-
-    wrapper.addEventListener("drop", (event) => {
-      wrapper.classList.remove("atlas-md-editor-dragover");
-      if (!uploadEndpoint) {
-        return;
-      }
-      handleDropImageUpload(textarea, event, { uploadEndpoint, csrfToken });
-    });
-
-    lint.addEventListener("click", (event) => {
-      const target = event.target;
-      if (!(target instanceof HTMLButtonElement)) {
-        return;
-      }
-      const line = Number.parseInt(target.dataset.mdLine || "", 10);
-      if (!Number.isFinite(line) || line < 1) {
-        return;
-      }
-
-      let cursor = 0;
-      let currentLine = 1;
-      const source = textarea.value;
-      while (currentLine < line) {
-        const nextBreak = source.indexOf("\n", cursor);
-        if (nextBreak === -1) {
-          break;
-        }
-        cursor = nextBreak + 1;
-        currentLine += 1;
-      }
-
-      setMode("write");
-      textarea.focus();
-      textarea.setSelectionRange(cursor, cursor);
-    });
-
-    renderLint();
   }
 
   document.addEventListener("DOMContentLoaded", () => {
@@ -989,3 +649,4 @@
     }
   });
 })();
+
