@@ -4014,6 +4014,104 @@ body {
   color: #bd4a62;
 }
 
+/* Dashboard-specific balance: cleaner hero and easier reading on cards */
+.app-page-dashboard .atlas-layout-two {
+  grid-template-columns: 324px minmax(0, 1fr);
+  gap: 16px;
+}
+
+.app-page-dashboard .atlas-main {
+  gap: 16px;
+}
+
+.app-page-dashboard .atlas-main .atlas-card {
+  padding: clamp(16px, 1.4vw, 22px);
+}
+
+.app-page-dashboard .atlas-main .atlas-card.atlas-hero {
+  border-color: #9dc2b6;
+  background:
+    radial-gradient(circle at 96% -10%, rgba(222, 157, 81, 0.24), transparent 34%),
+    radial-gradient(circle at 7% 0%, rgba(11, 122, 109, 0.15), transparent 38%),
+    linear-gradient(145deg, rgba(236, 249, 244, 0.97), rgba(249, 253, 251, 0.97));
+}
+
+.app-page-dashboard .atlas-hero-grid {
+  grid-template-columns: minmax(0, 1.12fr) minmax(260px, 0.88fr);
+  gap: 18px;
+}
+
+.app-page-dashboard .atlas-hero-title {
+  max-width: 24ch;
+  font-size: clamp(31px, 2.9vw, 45px);
+  line-height: 1.11;
+}
+
+.app-page-dashboard .atlas-hero-text {
+  max-width: 64ch;
+  font-size: clamp(15px, 0.6vw + 13px, 18px);
+  line-height: 1.66;
+}
+
+.app-page-dashboard .atlas-ops-panel {
+  padding: 14px;
+  border-radius: 14px;
+}
+
+.app-page-dashboard .atlas-recent-card {
+  border-color: #9ec3b8;
+  background:
+    radial-gradient(circle at 96% -8%, rgba(223, 157, 83, 0.2), transparent 34%),
+    radial-gradient(circle at 4% -4%, rgba(13, 118, 109, 0.12), transparent 36%),
+    linear-gradient(152deg, rgba(240, 249, 246, 0.98), rgba(251, 253, 252, 0.97));
+}
+
+.app-page-dashboard .atlas-recent-list {
+  margin-top: 18px;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+
+.app-page-dashboard .atlas-recent-item {
+  border-color: #bfd5ce;
+  border-radius: 14px;
+  padding: 14px 14px 13px;
+}
+
+.app-page-dashboard .atlas-recent-item:first-child {
+  padding: 16px 16px 15px;
+}
+
+.app-page-dashboard .atlas-article-card h3 {
+  margin-top: 10px;
+  font-size: clamp(22px, 1.5vw, 30px);
+  line-height: 1.2;
+}
+
+.app-page-dashboard .atlas-article-card[data-article-card].is-expanded h3 {
+  font-size: clamp(25px, 2vw, 35px);
+}
+
+.app-page-dashboard .atlas-recent-body {
+  line-height: 1.64;
+}
+
+.app-page-dashboard .atlas-md-snippet {
+  max-height: 216px;
+}
+
+.app-page-dashboard .atlas-article-card[data-article-card].is-expanded .atlas-md-snippet {
+  max-height: 900px;
+}
+
+.app-page-dashboard .atlas-recent-actions {
+  row-gap: 10px;
+}
+
+.app-page-dashboard .atlas-recent-actions-main {
+  gap: 7px;
+}
+
 @keyframes hero-orbit {
   0%,
   100% {

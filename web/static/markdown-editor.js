@@ -836,7 +836,7 @@
       const chars = source.length;
       const words = trimmed === "" ? 0 : trimmed.split(/\s+/).filter(Boolean).length;
       const readMins = words > 0 ? Math.max(1, Math.round(words / 180)) : 0;
-      stats.textContent = words > 0 ? `${words} words � ${chars} chars � ~${readMins} min read` : "0 words � 0 chars";
+      stats.textContent = words > 0 ? `${words} слов | ${chars} знаков | ~${readMins} мин чтения` : "0 слов | 0 знаков";
     };
 
     const renderLint = () => {
