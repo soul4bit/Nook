@@ -3148,10 +3148,27 @@ body {
 }
 
 .atlas-md-mode {
-  margin-left: auto;
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+.atlas-md-meta {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.atlas-md-stats {
+  margin: 0;
+  color: #4c6b63;
+  font-size: 11px;
+  line-height: 1.35;
+  letter-spacing: 0.01em;
+  font-family: "IBM Plex Mono", "Consolas", monospace;
 }
 
 .field .atlas-md-input {
@@ -3874,6 +3891,74 @@ body {
   box-shadow: 0 16px 32px rgba(16, 56, 47, 0.14);
 }
 
+.atlas-article-card[data-article-card] {
+  position: relative;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.24s ease,
+    background 0.24s ease;
+}
+
+.atlas-article-card[data-article-card].is-expanded {
+  border-color: #90bcaf;
+  background:
+    radial-gradient(circle at 100% -10%, rgba(224, 160, 83, 0.2), transparent 36%),
+    linear-gradient(156deg, rgba(249, 255, 252, 0.98), rgba(236, 248, 243, 0.96));
+  box-shadow:
+    0 16px 34px rgba(14, 56, 47, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+.atlas-article-card[data-article-card].is-expanded h3 {
+  font-size: clamp(30px, 2.35vw, 42px);
+}
+
+.atlas-article-expand-toggle {
+  border-style: dashed;
+  border-color: #9fc2b7;
+  background: rgba(245, 252, 249, 0.9);
+  color: #2d5a52;
+}
+
+.atlas-article-card[data-article-card].is-expanded .atlas-article-expand-toggle {
+  border-color: #7fada0;
+  background: rgba(222, 240, 232, 0.9);
+  color: #164740;
+}
+
+.atlas-md-snippet {
+  max-height: 176px;
+}
+
+.atlas-article-card[data-article-card].is-expanded .atlas-md-snippet {
+  max-height: 860px;
+}
+
+.atlas-article-card[data-article-card].is-expanded .atlas-md-snippet::after {
+  opacity: 0;
+}
+
+.atlas-recent-actions-main {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.atlas-recent-item.is-expanded .atlas-recent-body {
+  display: block;
+  max-height: none;
+  overflow: visible;
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+}
+
+.atlas-recent-item.is-expanded .atlas-md-snippet::after {
+  opacity: 0;
+}
+
 .article-form {
   gap: 16px;
 }
@@ -4291,6 +4376,11 @@ body {
     justify-content: flex-start;
   }
 
+  .atlas-recent-actions-main {
+    justify-content: flex-start;
+    width: 100%;
+  }
+
   .atlas-admin-inline-input {
     min-width: 180px;
   }
@@ -4299,6 +4389,16 @@ body {
     flex-direction: column;
     align-items: flex-start;
     gap: 4px;
+  }
+
+  .atlas-md-meta {
+    width: 100%;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .atlas-md-stats {
+    width: 100%;
   }
 
   .atlas-admin-wiki-grid {

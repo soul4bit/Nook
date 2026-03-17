@@ -1,4 +1,4 @@
-﻿(() => {
+(() => {
   const BLOCK_ACTIONS = {
     h1: "# ",
     h2: "## ",
@@ -710,7 +710,7 @@
       if (hasBoldSpaceIssue) {
         issues.push({
           line: lineNumber,
-          message: "РџСЂРѕР±РµР» РІРЅСѓС‚СЂРё **...**: РІ С„РёРЅР°Р»Рµ РјРѕР¶РµС‚ РїРѕРєР°Р·Р°С‚СЊСЃСЏ СЃС‹СЂРѕР№ markdown.",
+          message: "Пробел внутри **...**: в финале может показаться сырой markdown.",
         });
       }
 
@@ -720,7 +720,7 @@
         if (!sanitizeURL(rawURL)) {
           issues.push({
             line: lineNumber,
-            message: "РЎСЃС‹Р»РєР°/РєР°СЂС‚РёРЅРєР° СЃ РЅРµРєРѕСЂСЂРµРєС‚РЅС‹Рј URL (С‚РѕР»СЊРєРѕ http/https).",
+            message: "Ссылка/картинка с некорректным URL (только http/https).",
           });
         }
       }
@@ -729,7 +729,7 @@
     if (fenceOpenLine !== 0) {
       issues.push({
         line: fenceOpenLine,
-        message: "РќРµР·Р°РєСЂС‹С‚С‹Р№ РєРѕРґ-Р±Р»РѕРє ```.",
+        message: "Незакрытый код-блок ```.",
       });
     }
 
@@ -794,7 +794,13 @@
     splitBtn.dataset.mdMode = "split";
 
     modeSwitch.append(writeBtn, previewBtn, splitBtn);
-    toolbar.append(modeSwitch);
+
+    const meta = document.createElement("div");
+    meta.className = "atlas-md-meta";
+    const stats = document.createElement("p");
+    stats.className = "atlas-md-stats";
+    meta.append(stats, modeSwitch);
+    toolbar.append(meta);
 
     const body = document.createElement("div");
     body.className = "atlas-md-body";
@@ -824,6 +830,15 @@
       preview.innerHTML = renderMarkdown(textarea.value.trim());
     };
 
+    const updateStats = () => {
+      const source = textarea.value;
+      const trimmed = source.trim();
+      const chars = source.length;
+      const words = trimmed === "" ? 0 : trimmed.split(/\s+/).filter(Boolean).length;
+      const readMins = words > 0 ? Math.max(1, Math.round(words / 180)) : 0;
+      stats.textContent = words > 0 ? `${words} words � ${chars} chars � ~${readMins} min read` : "0 words � 0 chars";
+    };
+
     const renderLint = () => {
       const issues = collectMarkdownLintIssues(textarea.value);
       if (issues.length === 0) {
@@ -836,10 +851,10 @@
       const items = issues
         .map(
           (issue) =>
-            `<li><button type="button" class="atlas-md-lint-link" data-md-line="${issue.line}">РЎС‚СЂРѕРєР° ${issue.line}</button><span>${escapeHTML(issue.message)}</span></li>`
+            `<li><button type="button" class="atlas-md-lint-link" data-md-line="${issue.line}">Строка ${issue.line}</button><span>${escapeHTML(issue.message)}</span></li>`
         )
         .join("");
-      lint.innerHTML = `<p class="atlas-md-lint-title">РџСЂРѕРІРµСЂСЊС‚Рµ Markdown:</p><ul class="atlas-md-lint-list">${items}</ul>`;
+      lint.innerHTML = `<p class="atlas-md-lint-title">Проверьте Markdown:</p><ul class="atlas-md-lint-list">${items}</ul>`;
     };
 
     const setMode = (mode) => {
@@ -925,6 +940,7 @@
         renderPreview();
       }
       renderLint();
+      updateStats();
     });
 
     const syncScroll = (sourceNode, targetNode) => {
@@ -1021,6 +1037,7 @@
     });
 
     renderLint();
+    updateStats();
   }
 
   document.addEventListener("DOMContentLoaded", () => {

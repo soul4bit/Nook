@@ -133,17 +133,22 @@
           </div>
           {{if .RecentArticles}}
             <div class="atlas-article-list atlas-recent-list">
-              {{range .RecentArticles}}
-                <article class="atlas-article-card atlas-recent-item">
+              {{range $idx, $article := .RecentArticles}}
+                <article class="atlas-article-card atlas-recent-item {{if eq $idx 0}}is-expanded{{end}}" data-article-card>
                   <div class="atlas-article-meta">
-                    <span class="atlas-recent-path">{{.SectionName}}{{if .Subsection}} / {{.Subsection}}{{end}}</span>
-                    <span class="atlas-recent-date">{{.UpdatedAt.Format "02.01.2006 15:04"}}</span>
+                    <span class="atlas-recent-path">{{$article.SectionName}}{{if $article.Subsection}} / {{$article.Subsection}}{{end}}</span>
+                    <span class="atlas-recent-date">{{$article.UpdatedAt.Format "02.01.2006 15:04"}}</span>
                   </div>
-                  <h3><a class="atlas-article-title-link" href="/app/article?id={{.ID}}">{{.Title}}</a></h3>
-                  <div class="atlas-article-body atlas-recent-body atlas-md-snippet">{{markdown .Body}}</div>
+                  <h3><a class="atlas-article-title-link" href="/app/article?id={{$article.ID}}">{{$article.Title}}</a></h3>
+                  <div class="atlas-article-body atlas-recent-body atlas-md-snippet" data-article-snippet>{{markdown $article.Body}}</div>
                   <div class="atlas-article-actions atlas-recent-actions">
-                    <p class="atlas-article-author atlas-recent-author">Автор: {{.AuthorName}}</p>
-                    <a class="button button-ghost button-compact" href="/app/article?id={{.ID}}">Открыть</a>
+                    <p class="atlas-article-author atlas-recent-author">Автор: {{$article.AuthorName}}</p>
+                    <div class="atlas-recent-actions-main">
+                      <button class="button button-ghost button-compact atlas-article-expand-toggle" type="button" data-article-expand-toggle data-label-expand="Развернуть" data-label-collapse="Свернуть" aria-expanded="{{if eq $idx 0}}true{{else}}false{{end}}">
+                        {{if eq $idx 0}}Свернуть{{else}}Развернуть{{end}}
+                      </button>
+                      <a class="button button-ghost button-compact" href="/app/article?id={{$article.ID}}">Открыть</a>
+                    </div>
                   </div>
                 </article>
               {{end}}
@@ -162,3 +167,4 @@
   <script src="{{asset "wiki-ui.js"}}"></script>
 </body>
 </html>
+

@@ -94,26 +94,29 @@
 
         {{if .SectionArticles}}
           <div class="atlas-article-list">
-            {{range .SectionArticles}}
-              <article class="atlas-card atlas-article-card">
+            {{range $idx, $article := .SectionArticles}}
+              <article class="atlas-card atlas-article-card {{if eq $idx 0}}is-expanded{{end}}" data-article-card>
                 <div class="atlas-article-meta">
-                  <span>Автор: {{.AuthorName}}</span>
-                  <span>{{.UpdatedAt.Format "02.01.2006 15:04"}}</span>
+                  <span>Автор: {{$article.AuthorName}}</span>
+                  <span>{{$article.UpdatedAt.Format "02.01.2006 15:04"}}</span>
                 </div>
-                {{if .Subsection}}
-                  <p class="atlas-article-subsection">Подраздел: {{.Subsection}}</p>
+                {{if $article.Subsection}}
+                  <p class="atlas-article-subsection">Подраздел: {{$article.Subsection}}</p>
                 {{end}}
-                <h3><a class="atlas-article-title-link" href="/app/article?id={{.ID}}">{{.Title}}</a></h3>
-                <div class="atlas-article-body atlas-md-snippet">{{markdown .Body}}</div>
+                <h3><a class="atlas-article-title-link" href="/app/article?id={{$article.ID}}">{{$article.Title}}</a></h3>
+                <div class="atlas-article-body atlas-md-snippet" data-article-snippet>{{markdown $article.Body}}</div>
                 <div class="atlas-article-actions">
-                  <a class="button button-ghost button-compact" href="/app/article?id={{.ID}}">Открыть</a>
-                  {{if and $.User.CanEdit (or (eq $.User.ID .AuthorID) $.User.IsAdmin)}}
-                    <a class="button button-ghost button-compact" href="/app/article/edit?id={{.ID}}">Редактировать</a>
+                  <button class="button button-ghost button-compact atlas-article-expand-toggle" type="button" data-article-expand-toggle data-label-expand="Развернуть" data-label-collapse="Свернуть" aria-expanded="{{if eq $idx 0}}true{{else}}false{{end}}">
+                    {{if eq $idx 0}}Свернуть{{else}}Развернуть{{end}}
+                  </button>
+                  <a class="button button-ghost button-compact" href="/app/article?id={{$article.ID}}">Открыть</a>
+                  {{if and $.User.CanEdit (or (eq $.User.ID $article.AuthorID) $.User.IsAdmin)}}
+                    <a class="button button-ghost button-compact" href="/app/article/edit?id={{$article.ID}}">Редактировать</a>
                   {{end}}
                   {{if $.User.CanEdit}}
                     <form method="post" action="/app/article/delete" onsubmit="return confirm('Удалить статью? Это действие необратимо.');">
                       <input type="hidden" name="csrf_token" value="{{$.CSRFToken}}" />
-                      <input type="hidden" name="article_id" value="{{.ID}}" />
+                      <input type="hidden" name="article_id" value="{{$article.ID}}" />
                       <button class="button button-ghost button-compact atlas-danger-button" type="submit">Удалить</button>
                     </form>
                   {{end}}
@@ -140,3 +143,4 @@
   <script src="{{asset "wiki-ui.js"}}"></script>
 </body>
 </html>
+
