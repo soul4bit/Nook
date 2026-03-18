@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="{{asset "app.css"}}" />
 </head>
-<body class="app-page app-page-dashboard">
+<body class="app-page app-page-feed app-page-dashboard">
   <main class="atlas-shell">
     <header class="atlas-topbar">
       <a class="atlas-brand atlas-brand-link" href="/app">
@@ -132,9 +132,9 @@
             {{end}}
           </div>
           {{if .RecentArticles}}
-            <div class="atlas-article-list atlas-recent-list">
+            <div class="atlas-article-list atlas-recent-list atlas-feed-list">
               {{range $article := .RecentArticles}}
-                <article class="atlas-article-card atlas-recent-item">
+                <article class="atlas-article-card atlas-recent-item atlas-feed-item">
                   <div class="atlas-article-meta atlas-feed-meta">
                     <span class="atlas-feed-author">Автор: {{$article.AuthorName}}</span>
                     <span class="atlas-feed-divider" aria-hidden="true">•</span>
