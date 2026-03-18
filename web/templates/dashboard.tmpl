@@ -135,14 +135,20 @@
             <div class="atlas-article-list atlas-recent-list">
               {{range $article := .RecentArticles}}
                 <article class="atlas-article-card atlas-recent-item">
-                  <div class="atlas-article-meta">
-                    <span class="atlas-recent-path">{{$article.SectionName}}{{if $article.Subsection}} / {{$article.Subsection}}{{end}}</span>
-                    <span class="atlas-recent-date">{{$article.UpdatedAt.Format "02.01.2006 15:04"}}</span>
+                  <div class="atlas-article-meta atlas-feed-meta">
+                    <span class="atlas-feed-author">Автор: {{$article.AuthorName}}</span>
+                    <span class="atlas-feed-divider" aria-hidden="true">•</span>
+                    <span class="atlas-feed-date">{{$article.UpdatedAt.Format "02.01.2006 15:04"}}</span>
                   </div>
                   <h3><a class="atlas-article-title-link" href="/app/article?id={{$article.ID}}">{{$article.Title}}</a></h3>
+                  <div class="atlas-feed-hubs">
+                    <a class="atlas-feed-hub" href="/app/section?slug={{$article.SectionSlug}}">{{$article.SectionName}}</a>
+                    {{if $article.Subsection}}
+                      <span class="atlas-feed-hub atlas-feed-hub-muted">{{$article.Subsection}}</span>
+                    {{end}}
+                  </div>
                   <div class="atlas-article-body atlas-recent-body atlas-md-snippet">{{markdown $article.Body}}</div>
                   <div class="atlas-article-actions atlas-recent-actions">
-                    <p class="atlas-article-author atlas-recent-author">Автор: {{$article.AuthorName}}</p>
                     <div class="atlas-recent-actions-main">
                       <a class="button button-ghost button-compact" href="/app/article?id={{$article.ID}}">Открыть</a>
                     </div>

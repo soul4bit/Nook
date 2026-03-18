@@ -4003,62 +4003,170 @@ body {
 }
 
 .app-page-dashboard .atlas-recent-card {
-  border-color: #9ec3b8;
-  background:
-    radial-gradient(circle at 96% -8%, rgba(223, 157, 83, 0.2), transparent 34%),
-    radial-gradient(circle at 4% -4%, rgba(13, 118, 109, 0.12), transparent 36%),
-    linear-gradient(152deg, rgba(240, 249, 246, 0.98), rgba(251, 253, 252, 0.97));
+  border-color: #c8d7d2;
+  background: linear-gradient(180deg, rgba(248, 251, 250, 0.98), rgba(244, 248, 246, 0.97));
+}
+
+.app-page-dashboard .atlas-recent-card::before {
+  display: none;
+}
+
+.app-page-dashboard .atlas-recent-head {
+  align-items: end;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #d8e3df;
+}
+
+.app-page-dashboard .atlas-recent-note {
+  max-width: 70ch;
+  font-size: 14px;
+  color: #5f7570;
 }
 
 .app-page-dashboard .atlas-recent-list {
-  margin-top: 18px;
-  gap: 12px;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  align-items: stretch;
+  margin-top: 14px;
+  gap: 10px;
+  grid-template-columns: 1fr;
 }
 
 .app-page-dashboard .atlas-recent-item {
-  border-color: #bfd5ce;
-  border-radius: 14px;
-  padding: 14px 14px 13px;
-  min-height: 280px;
+  border-color: #d7e2de;
+  border-radius: 12px;
+  padding: 15px 16px 14px;
+  min-height: 0;
+  background: #ffffff;
+  box-shadow: 0 1px 0 rgba(222, 231, 228, 0.9);
+}
+
+.app-page-dashboard .atlas-recent-item::before {
+  display: none;
+}
+
+.app-page-dashboard .atlas-recent-item:hover,
+.app-page-dashboard .atlas-recent-item:focus-within {
+  transform: none;
+  border-color: #c3d3cd;
+  box-shadow: 0 8px 20px rgba(26, 66, 57, 0.08);
 }
 
 .app-page-dashboard .atlas-recent-item:first-child {
   grid-column: auto;
-  padding: 14px 14px 13px;
-  background: linear-gradient(165deg, rgba(255, 255, 255, 0.96), rgba(243, 249, 247, 0.95));
+  padding: 15px 16px 14px;
+  background: #ffffff;
 }
 
 .app-page-dashboard .atlas-recent-item:first-child h3 {
-  font-size: clamp(22px, 1.5vw, 30px);
+  font-size: clamp(24px, 1.9vw, 32px);
 }
 
 .app-page-dashboard .atlas-recent-item:first-child .atlas-recent-body {
-  -webkit-line-clamp: 4;
-  line-clamp: 4;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+}
+
+.app-page-dashboard .atlas-feed-meta {
+  justify-content: flex-start;
+  gap: 8px;
+  flex-wrap: wrap;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 12px;
+  color: #687d78;
+}
+
+.app-page-dashboard .atlas-feed-author {
+  color: #45605a;
+  font-weight: 600;
+}
+
+.app-page-dashboard .atlas-feed-divider {
+  color: #9ab1ab;
+}
+
+.app-page-dashboard .atlas-feed-date {
+  font-family: "IBM Plex Mono", "Consolas", monospace;
+  color: #5d7771;
 }
 
 .app-page-dashboard .atlas-article-card h3 {
-  margin-top: 10px;
-  font-size: clamp(22px, 1.5vw, 30px);
-  line-height: 1.2;
+  margin-top: 6px;
+  font-size: clamp(24px, 1.9vw, 32px);
+  line-height: 1.18;
+}
+
+.app-page-dashboard .atlas-feed-hubs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 9px;
+}
+
+.app-page-dashboard .atlas-feed-hub {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid #d2e0db;
+  background: #edf5f2;
+  color: #285a50;
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.app-page-dashboard .atlas-feed-hub:hover {
+  background: #e5f0ec;
+  border-color: #c4d6cf;
+}
+
+.app-page-dashboard .atlas-feed-hub-muted {
+  background: #f4f8f7;
+  color: #607772;
+  border-color: #dce6e3;
 }
 
 .app-page-dashboard .atlas-recent-body {
-  line-height: 1.64;
+  margin-top: 10px;
+  line-height: 1.62;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
 }
 
 .app-page-dashboard .atlas-md-snippet {
-  max-height: 170px;
+  max-height: 156px;
+}
+
+.app-page-dashboard .atlas-md-snippet::after {
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.98));
 }
 
 .app-page-dashboard .atlas-recent-actions {
-  row-gap: 10px;
+  margin-top: 12px;
+  row-gap: 8px;
+  justify-content: flex-end;
 }
 
 .app-page-dashboard .atlas-recent-actions-main {
-  gap: 7px;
+  margin-left: auto;
+  gap: 8px;
+}
+
+.app-page-dashboard .atlas-recent-actions-main .button {
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 8px;
+}
+
+.app-page-dashboard .atlas-recent-actions-main .button-ghost {
+  border-color: #d4e1dd;
+  background: #f3f7f6;
+  color: #204d45;
+}
+
+.app-page-dashboard .atlas-recent-actions-main .button-ghost:hover {
+  border-color: #c2d4ce;
+  background: #eaf2ef;
 }
 
 @keyframes hero-orbit {
