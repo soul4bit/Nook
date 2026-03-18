@@ -3891,52 +3891,8 @@ body {
   box-shadow: 0 16px 32px rgba(16, 56, 47, 0.14);
 }
 
-.atlas-article-card[data-article-card] {
-  position: relative;
-  transition:
-    transform 0.2s ease,
-    border-color 0.2s ease,
-    box-shadow 0.24s ease,
-    background 0.24s ease;
-}
-
-.atlas-article-card[data-article-card].is-expanded {
-  border-color: #90bcaf;
-  background:
-    radial-gradient(circle at 100% -10%, rgba(224, 160, 83, 0.2), transparent 36%),
-    linear-gradient(156deg, rgba(249, 255, 252, 0.98), rgba(236, 248, 243, 0.96));
-  box-shadow:
-    0 16px 34px rgba(14, 56, 47, 0.14),
-    inset 0 1px 0 rgba(255, 255, 255, 0.72);
-}
-
-.atlas-article-card[data-article-card].is-expanded h3 {
-  font-size: clamp(30px, 2.35vw, 42px);
-}
-
-.atlas-article-expand-toggle {
-  border-style: dashed;
-  border-color: #9fc2b7;
-  background: rgba(245, 252, 249, 0.9);
-  color: #2d5a52;
-}
-
-.atlas-article-card[data-article-card].is-expanded .atlas-article-expand-toggle {
-  border-color: #7fada0;
-  background: rgba(222, 240, 232, 0.9);
-  color: #164740;
-}
-
 .atlas-md-snippet {
   max-height: 176px;
-}
-
-.atlas-article-card[data-article-card].is-expanded .atlas-md-snippet {
-  max-height: 860px;
-}
-
-.atlas-article-card[data-article-card].is-expanded .atlas-md-snippet::after {
-  opacity: 0;
 }
 
 .atlas-recent-actions-main {
@@ -3945,18 +3901,6 @@ body {
   justify-content: flex-end;
   gap: 8px;
   flex-wrap: wrap;
-}
-
-.atlas-recent-item.is-expanded .atlas-recent-body {
-  display: block;
-  max-height: none;
-  overflow: visible;
-  -webkit-line-clamp: unset;
-  line-clamp: unset;
-}
-
-.atlas-recent-item.is-expanded .atlas-md-snippet::after {
-  opacity: 0;
 }
 
 .article-form {
@@ -4101,21 +4045,12 @@ body {
   line-height: 1.2;
 }
 
-.app-page-dashboard .atlas-article-card[data-article-card].is-expanded h3 {
-  font-size: clamp(22px, 1.5vw, 30px);
-}
-
 .app-page-dashboard .atlas-recent-body {
   line-height: 1.64;
 }
 
 .app-page-dashboard .atlas-md-snippet {
   max-height: 170px;
-}
-
-.app-page-dashboard .atlas-article-card[data-article-card].is-expanded .atlas-md-snippet {
-  max-height: none;
-  overflow: visible;
 }
 
 .app-page-dashboard .atlas-recent-actions {

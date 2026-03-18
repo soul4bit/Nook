@@ -242,45 +242,6 @@
     scheduleUpdate();
   }
 
-  function updateArticleCardExpandState(card, expanded) {
-    if (!(card instanceof HTMLElement)) {
-      return;
-    }
-
-    const toggle = card.querySelector("[data-article-expand-toggle]");
-    if (!(toggle instanceof HTMLButtonElement)) {
-      return;
-    }
-
-    card.classList.toggle("is-expanded", expanded);
-    toggle.setAttribute("aria-expanded", expanded ? "true" : "false");
-
-    const expandLabel = String(toggle.dataset.labelExpand || "").trim() || "Expand";
-    const collapseLabel = String(toggle.dataset.labelCollapse || "").trim() || "Collapse";
-    toggle.textContent = expanded ? collapseLabel : expandLabel;
-  }
-
-  function initArticleCardExpanders() {
-    const cards = document.querySelectorAll("[data-article-card]");
-    for (const cardNode of cards) {
-      if (!(cardNode instanceof HTMLElement)) {
-        continue;
-      }
-
-      const snippet = cardNode.querySelector("[data-article-snippet]");
-      const toggle = cardNode.querySelector("[data-article-expand-toggle]");
-      if (!(snippet instanceof HTMLElement) || !(toggle instanceof HTMLButtonElement)) {
-        continue;
-      }
-
-      updateArticleCardExpandState(cardNode, cardNode.classList.contains("is-expanded"));
-      toggle.addEventListener("click", () => {
-        const expanded = !cardNode.classList.contains("is-expanded");
-        updateArticleCardExpandState(cardNode, expanded);
-      });
-    }
-  }
-
   function attachCounter(field, control) {
     if (!(field instanceof HTMLElement) || !(control instanceof HTMLElement)) {
       return;
@@ -543,7 +504,6 @@
     initSidebarSearch();
     initGlobalHotkeys();
     initReadingProgress();
-    initArticleCardExpanders();
     initProfileAvatarUploadUX();
 
     // Wait until editor scripts finish moving textarea nodes inside wrappers.
