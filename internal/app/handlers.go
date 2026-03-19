@@ -778,7 +778,7 @@ func (a *Application) handleDashboard(w http.ResponseWriter, r *http.Request) {
 
 	go func() {
 		defer queryWG.Done()
-		recent, err := a.getRecentArticles(8)
+		recent, err := a.getRecentArticles(5)
 		if err != nil {
 			a.logger.Printf("get recent articles: %v", err)
 			return
